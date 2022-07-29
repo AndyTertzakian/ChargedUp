@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<head>    
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+    
+        <script>
+            L_NO_TOUCH = false;
+            L_DISABLE_3D = false;
+        </script>
+    
+    <style>html, body {width: 100%;height: 100%;margin: 0;padding: 0;}</style>
+    <style>#map {position:absolute;top:0;bottom:0;right:0;left:0;}</style>
+    <script src="https://cdn.jsdelivr.net/npm/leaflet@1.6.0/dist/leaflet.js"></script>
+    <script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.6.0/dist/leaflet.css"/>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css"/>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/python-visualization/folium/folium/templates/leaflet.awesome.rotate.min.css"/>
+    
+            <meta name="viewport" content="width=device-width,
+                initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+            <style>
+                #map_db23cd53f597577b20d2b0460134494a {
+                    position: relative;
+                    width: 100.0%;
+                    height: 100.0%;
+                    left: 0.0%;
+                    top: 0.0%;
+                }
+            </style>
+        
+</head>
+<body>    
+    
+            <div class="folium-map" id="map_db23cd53f597577b20d2b0460134494a" ></div>
+        
+</body>
+<script>    
+    
+            var map_db23cd53f597577b20d2b0460134494a = L.map(
+                "map_db23cd53f597577b20d2b0460134494a",
+                {
+                    center: [37.772256900293655, -113.84000384362366],
+                    crs: L.CRS.EPSG3857,
+                    zoom: 6,
+                    zoomControl: true,
+                    preferCanvas: false,
+                }
+            );
+
+            
+
+        
+    
+            var tile_layer_592d8145176ce84b022ac4903d313c66 = L.tileLayer(
+                "https://stamen-tiles-{s}.a.ssl.fastly.net/terrain/{z}/{x}/{y}.jpg",
+                {"attribution": "Map tiles by \u003ca href=\"http://stamen.com\"\u003eStamen Design\u003c/a\u003e, under \u003ca href=\"http://creativecommons.org/licenses/by/3.0\"\u003eCC BY 3.0\u003c/a\u003e. Data by \u0026copy; \u003ca href=\"http://openstreetmap.org\"\u003eOpenStreetMap\u003c/a\u003e, under \u003ca href=\"http://creativecommons.org/licenses/by-sa/3.0\"\u003eCC BY SA\u003c/a\u003e.", "detectRetina": false, "maxNativeZoom": 18, "maxZoom": 18, "minZoom": 0, "noWrap": false, "opacity": 1, "subdomains": "abc", "tms": false}
+            ).addTo(map_db23cd53f597577b20d2b0460134494a);
+        
+    
+            var marker_1b5dc42ebd95ad47dd066e2db3d5bb38 = L.marker(
+                [37.8739088, -122.2617937],
+                {}
+            ).addTo(map_db23cd53f597577b20d2b0460134494a);
+        
+    
+            var icon_4b0044cfa3cbd11416562eb14b8e3d3c = L.AwesomeMarkers.icon(
+                {"extraClasses": "fa-rotate-0", "icon": "bolt", "iconColor": "white", "markerColor": "blue", "prefix": "fa-solid fa"}
+            );
+            marker_1b5dc42ebd95ad47dd066e2db3d5bb38.setIcon(icon_4b0044cfa3cbd11416562eb14b8e3d3c);
+        
+    
+        var popup_4fa926a7b246143ba62eb0f13db8da50 = L.popup({"maxWidth": "100%"});
+
+        
+            var html_be2738edb8615f8de7c2fa9b6a485f32 = $(`<div id="html_be2738edb8615f8de7c2fa9b6a485f32" style="width: 100.0%; height: 100.0%;"><iframe src="https://andytertzakian.github.io/chargedup.github.io/maps/Slrp.html" width="850" height="400"  frameborder="0"></div>`)[0];
+            popup_4fa926a7b246143ba62eb0f13db8da50.setContent(html_be2738edb8615f8de7c2fa9b6a485f32);
+        
+
+        marker_1b5dc42ebd95ad47dd066e2db3d5bb38.bindPopup(popup_4fa926a7b246143ba62eb0f13db8da50)
+        ;
+
+        
+    
+    
+            var marker_d6bd1b88d93ee86468864545b7ae286b = L.marker(
+                [37.4467274, -122.1630922],
+                {}
+            ).addTo(map_db23cd53f597577b20d2b0460134494a);
+        
+    
+            var icon_a5e0c641ab306fd49752120d0ed9b18c = L.AwesomeMarkers.icon(
+                {"extraClasses": "fa-rotate-0", "icon": "bolt", "iconColor": "white", "markerColor": "green", "prefix": "fa-solid fa"}
+            );
+            marker_d6bd1b88d93ee86468864545b7ae286b.setIcon(icon_a5e0c641ab306fd49752120d0ed9b18c);
+        
+    
+        var popup_78ea098df1ec8dbf98b1184b2b45c75b = L.popup({"maxWidth": "100%"});
+
+        
+            var html_163627654e7d8ce4229288759d4982bc = $(`<div id="html_163627654e7d8ce4229288759d4982bc" style="width: 100.0%; height: 100.0%;"><iframe src="https://andytertzakian.github.io/chargedup.github.io/maps/BRYANT.html" width="850" height="400"  frameborder="0"></div>`)[0];
+            popup_78ea098df1ec8dbf98b1184b2b45c75b.setContent(html_163627654e7d8ce4229288759d4982bc);
+        
+
+        marker_d6bd1b88d93ee86468864545b7ae286b.bindPopup(popup_78ea098df1ec8dbf98b1184b2b45c75b)
+        ;
+
+        
+    
+    
+            var marker_68ac2a439b371b42960a06a10f4b9efd = L.marker(
+                [37.4484262, -122.1620252],
+                {}
+            ).addTo(map_db23cd53f597577b20d2b0460134494a);
+        
+    
+            var icon_3f9bcd6f8437aefc8b55564005da2982 = L.AwesomeMarkers.icon(
+                {"extraClasses": "fa-rotate-0", "icon": "bolt", "iconColor": "white", "markerColor": "green", "prefix": "fa-solid fa"}
+            );
+            marker_68ac2a439b371b42960a06a10f4b9efd.setIcon(icon_3f9bcd6f8437aefc8b55564005da2982);
+        
+    
+        var popup_e261713460052804ad28d282f52339a7 = L.popup({"maxWidth": "100%"});
+
+        
+            var html_9bcf231ecb77df51afcc70b68201ac50 = $(`<div id="html_9bcf231ecb77df51afcc70b68201ac50" style="width: 100.0%; height: 100.0%;"><iframe src="https://andytertzakian.github.io/chargedup.github.io/maps/WEBSTER.html" width="850" height="400"  frameborder="0"></div>`)[0];
+            popup_e261713460052804ad28d282f52339a7.setContent(html_9bcf231ecb77df51afcc70b68201ac50);
+        
+
+        marker_68ac2a439b371b42960a06a10f4b9efd.bindPopup(popup_e261713460052804ad28d282f52339a7)
+        ;
+
+        
+    
+    
+            var marker_ebb5862d7fb37ef85bd025c60a596bc5 = L.marker(
+                [37.449283, -122.1582532],
+                {}
+            ).addTo(map_db23cd53f597577b20d2b0460134494a);
+        
+    
+            var icon_6f99458a0bbce028cfb372c575bf7a38 = L.AwesomeMarkers.icon(
+                {"extraClasses": "fa-rotate-0", "icon": "bolt", "iconColor": "white", "markerColor": "green", "prefix": "fa-solid fa"}
+            );
+            marker_ebb5862d7fb37ef85bd025c60a596bc5.setIcon(icon_6f99458a0bbce028cfb372c575bf7a38);
+        
+    
+        var popup_ce0dd101a801ce6d329eaaaf86cbb327 = L.popup({"maxWidth": "100%"});
+
+        
+            var html_3d5f4645e934719f3b4e0a366fddabc7 = $(`<div id="html_3d5f4645e934719f3b4e0a366fddabc7" style="width: 100.0%; height: 100.0%;"><iframe src="https://andytertzakian.github.io/chargedup.github.io/maps/HAMILTON.html" width="850" height="400"  frameborder="0"></div>`)[0];
+            popup_ce0dd101a801ce6d329eaaaf86cbb327.setContent(html_3d5f4645e934719f3b4e0a366fddabc7);
+        
+
+        marker_ebb5862d7fb37ef85bd025c60a596bc5.bindPopup(popup_ce0dd101a801ce6d329eaaaf86cbb327)
+        ;
+
+        
+    
+    
+            var marker_b1aad6828ad0a33454aaa14a16f2b2eb = L.marker(
+                [37.4431333, -122.1719076],
+                {}
+            ).addTo(map_db23cd53f597577b20d2b0460134494a);
+        
+    
+            var icon_6d48b29923dd53ecf44cb10de71fc161 = L.AwesomeMarkers.icon(
+                {"extraClasses": "fa-rotate-0", "icon": "bolt", "iconColor": "white", "markerColor": "green", "prefix": "fa-solid fa"}
+            );
+            marker_b1aad6828ad0a33454aaa14a16f2b2eb.setIcon(icon_6d48b29923dd53ecf44cb10de71fc161);
+        
+    
+        var popup_a6f036be0c2a5c6ad9e0ebd00db9c321 = L.popup({"maxWidth": "100%"});
+
+        
+            var html_49680fbc63610e6d1f1ce02c56a75c07 = $(`<div id="html_49680fbc63610e6d1f1ce02c56a75c07" style="width: 100.0%; height: 100.0%;"><iframe src="https://andytertzakian.github.io/chargedup.github.io/maps/HIGH.html" width="850" height="400"  frameborder="0"></div>`)[0];
+            popup_a6f036be0c2a5c6ad9e0ebd00db9c321.setContent(html_49680fbc63610e6d1f1ce02c56a75c07);
+        
+
+        marker_b1aad6828ad0a33454aaa14a16f2b2eb.bindPopup(popup_a6f036be0c2a5c6ad9e0ebd00db9c321)
+        ;
+
+        
+    
+    
+            var marker_ab368c54d723fae7873db14329e8f77b = L.marker(
+                [37.4279917, -122.1449875],
+                {}
+            ).addTo(map_db23cd53f597577b20d2b0460134494a);
+        
+    
+            var icon_516c32b4a51ec1b3a4e0a433c51fbebf = L.AwesomeMarkers.icon(
+                {"extraClasses": "fa-rotate-0", "icon": "bolt", "iconColor": "white", "markerColor": "green", "prefix": "fa-solid fa"}
+            );
+            marker_ab368c54d723fae7873db14329e8f77b.setIcon(icon_516c32b4a51ec1b3a4e0a433c51fbebf);
+        
+    
+        var popup_af47b8769d824110ea1d81ad0c54b42d = L.popup({"maxWidth": "100%"});
+
+        
+            var html_61bd27dbf8cdf5a73aceb3aea0d1ed03 = $(`<div id="html_61bd27dbf8cdf5a73aceb3aea0d1ed03" style="width: 100.0%; height: 100.0%;"><iframe src="https://andytertzakian.github.io/chargedup.github.io/maps/TED_THOMPSON.html" width="850" height="400"  frameborder="0"></div>`)[0];
+            popup_af47b8769d824110ea1d81ad0c54b42d.setContent(html_61bd27dbf8cdf5a73aceb3aea0d1ed03);
+        
+
+        marker_ab368c54d723fae7873db14329e8f77b.bindPopup(popup_af47b8769d824110ea1d81ad0c54b42d)
+        ;
+
+        
+    
+    
+            var marker_0a39ac0b4216acfc920292220e24a454 = L.marker(
+                [37.422751, -122.1140535],
+                {}
+            ).addTo(map_db23cd53f597577b20d2b0460134494a);
+        
+    
+            var icon_39482818fc5e3c9181a58916fe224195 = L.AwesomeMarkers.icon(
+                {"extraClasses": "fa-rotate-0", "icon": "bolt", "iconColor": "white", "markerColor": "green", "prefix": "fa-solid fa"}
+            );
+            marker_0a39ac0b4216acfc920292220e24a454.setIcon(icon_39482818fc5e3c9181a58916fe224195);
+        
+    
+        var popup_b7404b7912386052f247825c2a24e0d4 = L.popup({"maxWidth": "100%"});
+
+        
+            var html_8bda3b75896570492806e6167d75a6c1 = $(`<div id="html_8bda3b75896570492806e6167d75a6c1" style="width: 100.0%; height: 100.0%;"><iframe src="https://andytertzakian.github.io/chargedup.github.io/maps/MPL.html" width="850" height="400"  frameborder="0"></div>`)[0];
+            popup_b7404b7912386052f247825c2a24e0d4.setContent(html_8bda3b75896570492806e6167d75a6c1);
+        
+
+        marker_0a39ac0b4216acfc920292220e24a454.bindPopup(popup_b7404b7912386052f247825c2a24e0d4)
+        ;
+
+        
+    
+    
+            var marker_2b8714e00576cafa8d39118d2c0283d4 = L.marker(
+                [37.4497552, -122.1491587],
+                {}
+            ).addTo(map_db23cd53f597577b20d2b0460134494a);
+        
+    
+            var icon_40413899e83fa05c075c7764186487f2 = L.AwesomeMarkers.icon(
+                {"extraClasses": "fa-rotate-0", "icon": "bolt", "iconColor": "white", "markerColor": "green", "prefix": "fa-solid fa"}
+            );
+            marker_2b8714e00576cafa8d39118d2c0283d4.setIcon(icon_40413899e83fa05c075c7764186487f2);
+        
+    
+        var popup_0e680fbc803d5d8eaaad3650158eb385 = L.popup({"maxWidth": "100%"});
+
+        
+            var html_b716cab0ff99434afd0c90870ebee61f = $(`<div id="html_b716cab0ff99434afd0c90870ebee61f" style="width: 100.0%; height: 100.0%;"><iframe src="https://andytertzakian.github.io/chargedup.github.io/maps/RINCONADA_LIB.html" width="850" height="400"  frameborder="0"></div>`)[0];
+            popup_0e680fbc803d5d8eaaad3650158eb385.setContent(html_b716cab0ff99434afd0c90870ebee61f);
+        
+
+        marker_2b8714e00576cafa8d39118d2c0283d4.bindPopup(popup_0e680fbc803d5d8eaaad3650158eb385)
+        ;
+
+        
+    
+    
+            var marker_988db772f3d6ec8e0536c94267af07fa = L.marker(
+                [37.4272462, -122.1460422],
+                {}
+            ).addTo(map_db23cd53f597577b20d2b0460134494a);
+        
+    
+            var icon_4d473d7f312b139ca0de81f8924e90e1 = L.AwesomeMarkers.icon(
+                {"extraClasses": "fa-rotate-0", "icon": "bolt", "iconColor": "white", "markerColor": "green", "prefix": "fa-solid fa"}
+            );
+            marker_988db772f3d6ec8e0536c94267af07fa.setIcon(icon_4d473d7f312b139ca0de81f8924e90e1);
+        
+    
+        var popup_91f3ff2e65b6285b0accaef8289f19bb = L.popup({"maxWidth": "100%"});
+
+        
+            var html_f1559f5193aea5c7c20e8b274c4032eb = $(`<div id="html_f1559f5193aea5c7c20e8b274c4032eb" style="width: 100.0%; height: 100.0%;"><iframe src="https://andytertzakian.github.io/chargedup.github.io/maps/CAMBRIDGE.html" width="850" height="400"  frameborder="0"></div>`)[0];
+            popup_91f3ff2e65b6285b0accaef8289f19bb.setContent(html_f1559f5193aea5c7c20e8b274c4032eb);
+        
+
+        marker_988db772f3d6ec8e0536c94267af07fa.bindPopup(popup_91f3ff2e65b6285b0accaef8289f19bb)
+        ;
+
+        
+    
+    
+            var marker_9a7a43a8c50d9688e76ddf80d5e16b33 = L.marker(
+                [40.01528, -105.27637],
+                {}
+            ).addTo(map_db23cd53f597577b20d2b0460134494a);
+        
+    
+            var icon_d77949b642651611c2aabe938b9d4825 = L.AwesomeMarkers.icon(
+                {"extraClasses": "fa-rotate-0", "icon": "bolt", "iconColor": "white", "markerColor": "red", "prefix": "fa-solid fa"}
+            );
+            marker_9a7a43a8c50d9688e76ddf80d5e16b33.setIcon(icon_d77949b642651611c2aabe938b9d4825);
+        
+    
+        var popup_cbb269a9ea23d0c54c97778afa719427 = L.popup({"maxWidth": "100%"});
+
+        
+            var html_86c100618b17fa768757e023e00de2e3 = $(`<div id="html_86c100618b17fa768757e023e00de2e3" style="width: 100.0%; height: 100.0%;"><iframe src="https://andytertzakian.github.io/chargedup.github.io/maps/1745_14th_street.html" width="850" height="400"  frameborder="0"></div>`)[0];
+            popup_cbb269a9ea23d0c54c97778afa719427.setContent(html_86c100618b17fa768757e023e00de2e3);
+        
+
+        marker_9a7a43a8c50d9688e76ddf80d5e16b33.bindPopup(popup_cbb269a9ea23d0c54c97778afa719427)
+        ;
+
+        
+    
+    
+            var marker_d7bc9bb8c4453efc3cac62653c41dfdf = L.marker(
+                [40.0184689, -105.2774864],
+                {}
+            ).addTo(map_db23cd53f597577b20d2b0460134494a);
+        
+    
+            var icon_dafbfe255bd0ce3add0505f91917d57b = L.AwesomeMarkers.icon(
+                {"extraClasses": "fa-rotate-0", "icon": "bolt", "iconColor": "white", "markerColor": "red", "prefix": "fa-solid fa"}
+            );
+            marker_d7bc9bb8c4453efc3cac62653c41dfdf.setIcon(icon_dafbfe255bd0ce3add0505f91917d57b);
+        
+    
+        var popup_313f17370090b1973cb9599ae9536f3e = L.popup({"maxWidth": "100%"});
+
+        
+            var html_42b762b3c46042f4fa2c120e09baf3e0 = $(`<div id="html_42b762b3c46042f4fa2c120e09baf3e0" style="width: 100.0%; height: 100.0%;"><iframe src="https://andytertzakian.github.io/chargedup.github.io/maps/1500_Pearl_St.html" width="850" height="400"  frameborder="0"></div>`)[0];
+            popup_313f17370090b1973cb9599ae9536f3e.setContent(html_42b762b3c46042f4fa2c120e09baf3e0);
+        
+
+        marker_d7bc9bb8c4453efc3cac62653c41dfdf.bindPopup(popup_313f17370090b1973cb9599ae9536f3e)
+        ;
+
+        
+    
+    
+            var marker_689389105fbcceab94162f8d3f074e10 = L.marker(
+                [40.0154509, -105.2794388],
+                {}
+            ).addTo(map_db23cd53f597577b20d2b0460134494a);
+        
+    
+            var icon_1dd5cde808aae8c838180fef4afa0f83 = L.AwesomeMarkers.icon(
+                {"extraClasses": "fa-rotate-0", "icon": "bolt", "iconColor": "white", "markerColor": "red", "prefix": "fa-solid fa"}
+            );
+            marker_689389105fbcceab94162f8d3f074e10.setIcon(icon_1dd5cde808aae8c838180fef4afa0f83);
+        
+    
+        var popup_c84a2a37b78dcea5585c7de57a8a6fa7 = L.popup({"maxWidth": "100%"});
+
+        
+            var html_86289cd8a25d1b78650ab8b0d45df071 = $(`<div id="html_86289cd8a25d1b78650ab8b0d45df071" style="width: 100.0%; height: 100.0%;"><iframe src="https://andytertzakian.github.io/chargedup.github.io/maps/1770_13th_St.html" width="850" height="400"  frameborder="0"></div>`)[0];
+            popup_c84a2a37b78dcea5585c7de57a8a6fa7.setContent(html_86289cd8a25d1b78650ab8b0d45df071);
+        
+
+        marker_689389105fbcceab94162f8d3f074e10.bindPopup(popup_c84a2a37b78dcea5585c7de57a8a6fa7)
+        ;
+
+        
+    
+    
+            var marker_32519e778bd2c0eee63c855eb4a7a1dd = L.marker(
+                [39.9746415, -105.2508207],
+                {}
+            ).addTo(map_db23cd53f597577b20d2b0460134494a);
+        
+    
+            var icon_b57242815508fb77dbaaf29da80157fd = L.AwesomeMarkers.icon(
+                {"extraClasses": "fa-rotate-0", "icon": "bolt", "iconColor": "white", "markerColor": "red", "prefix": "fa-solid fa"}
+            );
+            marker_32519e778bd2c0eee63c855eb4a7a1dd.setIcon(icon_b57242815508fb77dbaaf29da80157fd);
+        
+    
+        var popup_fa565a0e8d4ceecc73c443bcd9ebeb65 = L.popup({"maxWidth": "100%"});
+
+        
+            var html_27491879640f7d4ca8e96173978acb05 = $(`<div id="html_27491879640f7d4ca8e96173978acb05" style="width: 100.0%; height: 100.0%;"><iframe src="https://andytertzakian.github.io/chargedup.github.io/maps/1360_Gillaspie_Dr.html" width="850" height="400"  frameborder="0"></div>`)[0];
+            popup_fa565a0e8d4ceecc73c443bcd9ebeb65.setContent(html_27491879640f7d4ca8e96173978acb05);
+        
+
+        marker_32519e778bd2c0eee63c855eb4a7a1dd.bindPopup(popup_fa565a0e8d4ceecc73c443bcd9ebeb65)
+        ;
+
+        
+    
+    
+            var marker_e57bbdff3237f0f3ea40972546f08cab = L.marker(
+                [40.0159843, -105.2846621],
+                {}
+            ).addTo(map_db23cd53f597577b20d2b0460134494a);
+        
+    
+            var icon_d801aad6e0647391ecb04c635de0fef5 = L.AwesomeMarkers.icon(
+                {"extraClasses": "fa-rotate-0", "icon": "bolt", "iconColor": "white", "markerColor": "red", "prefix": "fa-solid fa"}
+            );
+            marker_e57bbdff3237f0f3ea40972546f08cab.setIcon(icon_d801aad6e0647391ecb04c635de0fef5);
+        
+    
+        var popup_b2f3ae67edcc1370b8b534c0cea6d26f = L.popup({"maxWidth": "100%"});
+
+        
+            var html_d71d73554e797a2e6c29ded79262bfc0 = $(`<div id="html_d71d73554e797a2e6c29ded79262bfc0" style="width: 100.0%; height: 100.0%;"><iframe src="https://andytertzakian.github.io/chargedup.github.io/maps/900_Walnut_St.html" width="850" height="400"  frameborder="0"></div>`)[0];
+            popup_b2f3ae67edcc1370b8b534c0cea6d26f.setContent(html_d71d73554e797a2e6c29ded79262bfc0);
+        
+
+        marker_e57bbdff3237f0f3ea40972546f08cab.bindPopup(popup_b2f3ae67edcc1370b8b534c0cea6d26f)
+        ;
+
+        
+    
+    
+            var marker_6cc4df18ecc050d581a3c8bd227733a2 = L.marker(
+                [40.0185517, -105.2836497],
+                {}
+            ).addTo(map_db23cd53f597577b20d2b0460134494a);
+        
+    
+            var icon_89dad4aa738e649a58ec22bffb40fd29 = L.AwesomeMarkers.icon(
+                {"extraClasses": "fa-rotate-0", "icon": "bolt", "iconColor": "white", "markerColor": "red", "prefix": "fa-solid fa"}
+            );
+            marker_6cc4df18ecc050d581a3c8bd227733a2.setIcon(icon_89dad4aa738e649a58ec22bffb40fd29);
+        
+    
+        var popup_1b4fe4cee7a7b671f2f784b83a93e3d5 = L.popup({"maxWidth": "100%"});
+
+        
+            var html_2d72f6641d2eb7baedf1dd0b672e8afe = $(`<div id="html_2d72f6641d2eb7baedf1dd0b672e8afe" style="width: 100.0%; height: 100.0%;"><iframe src="https://andytertzakian.github.io/chargedup.github.io/maps/1100_Spruce_St.html" width="850" height="400"  frameborder="0"></div>`)[0];
+            popup_1b4fe4cee7a7b671f2f784b83a93e3d5.setContent(html_2d72f6641d2eb7baedf1dd0b672e8afe);
+        
+
+        marker_6cc4df18ecc050d581a3c8bd227733a2.bindPopup(popup_1b4fe4cee7a7b671f2f784b83a93e3d5)
+        ;
+
+        
+    
+    
+            var marker_f192e11d34dce10be2e55cac45cbcf16 = L.marker(
+                [40.0169488, -105.2786352],
+                {}
+            ).addTo(map_db23cd53f597577b20d2b0460134494a);
+        
+    
+            var icon_4376596fef13d422295e202695e064d0 = L.AwesomeMarkers.icon(
+                {"extraClasses": "fa-rotate-0", "icon": "bolt", "iconColor": "white", "markerColor": "red", "prefix": "fa-solid fa"}
+            );
+            marker_f192e11d34dce10be2e55cac45cbcf16.setIcon(icon_4376596fef13d422295e202695e064d0);
+        
+    
+        var popup_bf8403ce3a2b8232ad590cdc4b19c7f6 = L.popup({"maxWidth": "100%"});
+
+        
+            var html_38505a0bfb665ea137938bfd2a4d8a7d = $(`<div id="html_38505a0bfb665ea137938bfd2a4d8a7d" style="width: 100.0%; height: 100.0%;"><iframe src="https://andytertzakian.github.io/chargedup.github.io/maps/1400_Walnut_St.html" width="850" height="400"  frameborder="0"></div>`)[0];
+            popup_bf8403ce3a2b8232ad590cdc4b19c7f6.setContent(html_38505a0bfb665ea137938bfd2a4d8a7d);
+        
+
+        marker_f192e11d34dce10be2e55cac45cbcf16.bindPopup(popup_bf8403ce3a2b8232ad590cdc4b19c7f6)
+        ;
+
+        
+    
+    
+            var marker_dca05b3ac977475e1490a3aa7508d969 = L.marker(
+                [40.0259532, -105.2529939],
+                {}
+            ).addTo(map_db23cd53f597577b20d2b0460134494a);
+        
+    
+            var icon_81cd673fd5b54eb250f6a736218e63a5 = L.AwesomeMarkers.icon(
+                {"extraClasses": "fa-rotate-0", "icon": "bolt", "iconColor": "white", "markerColor": "red", "prefix": "fa-solid fa"}
+            );
+            marker_dca05b3ac977475e1490a3aa7508d969.setIcon(icon_81cd673fd5b54eb250f6a736218e63a5);
+        
+    
+        var popup_d282c8a5051fee814a1d9f69e96dcd45 = L.popup({"maxWidth": "100%"});
+
+        
+            var html_875dab15d2c0225c8d1ec1213f66e8f9 = $(`<div id="html_875dab15d2c0225c8d1ec1213f66e8f9" style="width: 100.0%; height: 100.0%;"><iframe src="https://andytertzakian.github.io/chargedup.github.io/maps/2052_Junction_Pl.html" width="850" height="400"  frameborder="0"></div>`)[0];
+            popup_d282c8a5051fee814a1d9f69e96dcd45.setContent(html_875dab15d2c0225c8d1ec1213f66e8f9);
+        
+
+        marker_dca05b3ac977475e1490a3aa7508d969.bindPopup(popup_d282c8a5051fee814a1d9f69e96dcd45)
+        ;
+
+        
+    
+    
+            var marker_76c3fecc35a490589f42399b681a5863 = L.marker(
+                [40.0163663, -105.2827991],
+                {}
+            ).addTo(map_db23cd53f597577b20d2b0460134494a);
+        
+    
+            var icon_a0153c604ed05f4f4b766f283f703559 = L.AwesomeMarkers.icon(
+                {"extraClasses": "fa-rotate-0", "icon": "bolt", "iconColor": "white", "markerColor": "red", "prefix": "fa-solid fa"}
+            );
+            marker_76c3fecc35a490589f42399b681a5863.setIcon(icon_a0153c604ed05f4f4b766f283f703559);
+        
+    
+        var popup_b3d83fa7587e886ae0c7ac9a25cc6a4c = L.popup({"maxWidth": "100%"});
+
+        
+            var html_77b641ab9f1ba1fb72381688bab4696d = $(`<div id="html_77b641ab9f1ba1fb72381688bab4696d" style="width: 100.0%; height: 100.0%;"><iframe src="https://andytertzakian.github.io/chargedup.github.io/maps/1100_Walnut.html" width="850" height="400"  frameborder="0"></div>`)[0];
+            popup_b3d83fa7587e886ae0c7ac9a25cc6a4c.setContent(html_77b641ab9f1ba1fb72381688bab4696d);
+        
+
+        marker_76c3fecc35a490589f42399b681a5863.bindPopup(popup_b3d83fa7587e886ae0c7ac9a25cc6a4c)
+        ;
+
+        
+    
+    
+            var marker_0f702b4385f7791551dbdf1da78ea6c0 = L.marker(
+                [40.0144993, -105.2814581],
+                {}
+            ).addTo(map_db23cd53f597577b20d2b0460134494a);
+        
+    
+            var icon_59f4f80b581c7333df6e268d41b39bdd = L.AwesomeMarkers.icon(
+                {"extraClasses": "fa-rotate-0", "icon": "bolt", "iconColor": "white", "markerColor": "red", "prefix": "fa-solid fa"}
+            );
+            marker_0f702b4385f7791551dbdf1da78ea6c0.setIcon(icon_59f4f80b581c7333df6e268d41b39bdd);
+        
+    
+        var popup_f2d2defd973ed3f28953a813939b7165 = L.popup({"maxWidth": "100%"});
+
+        
+            var html_58f431d971214609b3a90186ef18de54 = $(`<div id="html_58f431d971214609b3a90186ef18de54" style="width: 100.0%; height: 100.0%;"><iframe src="https://andytertzakian.github.io/chargedup.github.io/maps/1739_Broadway.html" width="850" height="400"  frameborder="0"></div>`)[0];
+            popup_f2d2defd973ed3f28953a813939b7165.setContent(html_58f431d971214609b3a90186ef18de54);
+        
+
+        marker_0f702b4385f7791551dbdf1da78ea6c0.bindPopup(popup_f2d2defd973ed3f28953a813939b7165)
+        ;
+
+        
+    
+    
+            var marker_a7d603bc1f274e29a141064651b191d7 = L.marker(
+                [40.0327682, -105.2831966],
+                {}
+            ).addTo(map_db23cd53f597577b20d2b0460134494a);
+        
+    
+            var icon_cf9624137b94708502b21e06538eefec = L.AwesomeMarkers.icon(
+                {"extraClasses": "fa-rotate-0", "icon": "bolt", "iconColor": "white", "markerColor": "red", "prefix": "fa-solid fa"}
+            );
+            marker_a7d603bc1f274e29a141064651b191d7.setIcon(icon_cf9624137b94708502b21e06538eefec);
+        
+    
+        var popup_01ce81f87cbc0f3c082e0d657c0c742c = L.popup({"maxWidth": "100%"});
+
+        
+            var html_9bc06481e3098d840b091bd10e0c6618 = $(`<div id="html_9bc06481e3098d840b091bd10e0c6618" style="width: 100.0%; height: 100.0%;"><iframe src="https://andytertzakian.github.io/chargedup.github.io/maps/3172_Broadway.html" width="850" height="400"  frameborder="0"></div>`)[0];
+            popup_01ce81f87cbc0f3c082e0d657c0c742c.setContent(html_9bc06481e3098d840b091bd10e0c6618);
+        
+
+        marker_a7d603bc1f274e29a141064651b191d7.bindPopup(popup_01ce81f87cbc0f3c082e0d657c0c742c)
+        ;
+
+        
+    
+    
+            var marker_1fe351367f805dd2e765d01c5e3781c1 = L.marker(
+                [39.9921117, -105.222267],
+                {}
+            ).addTo(map_db23cd53f597577b20d2b0460134494a);
+        
+    
+            var icon_b536f79c5db2be85ac4062e46c07d7bb = L.AwesomeMarkers.icon(
+                {"extraClasses": "fa-rotate-0", "icon": "bolt", "iconColor": "white", "markerColor": "red", "prefix": "fa-solid fa"}
+            );
+            marker_1fe351367f805dd2e765d01c5e3781c1.setIcon(icon_b536f79c5db2be85ac4062e46c07d7bb);
+        
+    
+        var popup_bad23cff939282dd92e0fe1e69678d45 = L.popup({"maxWidth": "100%"});
+
+        
+            var html_710d68fe7adb7e78cad0163e8be8966f = $(`<div id="html_710d68fe7adb7e78cad0163e8be8966f" style="width: 100.0%; height: 100.0%;"><iframe src="https://andytertzakian.github.io/chargedup.github.io/maps/5660_Sioux_Dr.html" width="850" height="400"  frameborder="0"></div>`)[0];
+            popup_bad23cff939282dd92e0fe1e69678d45.setContent(html_710d68fe7adb7e78cad0163e8be8966f);
+        
+
+        marker_1fe351367f805dd2e765d01c5e3781c1.bindPopup(popup_bad23cff939282dd92e0fe1e69678d45)
+        ;
+
+        
+    
+    
+            var marker_bd8923150184cf54d1a45582a069dd82 = L.marker(
+                [40.0800904, -105.2386908],
+                {}
+            ).addTo(map_db23cd53f597577b20d2b0460134494a);
+        
+    
+            var icon_35aa794fbff14510eb2b065f7d485255 = L.AwesomeMarkers.icon(
+                {"extraClasses": "fa-rotate-0", "icon": "bolt", "iconColor": "white", "markerColor": "red", "prefix": "fa-solid fa"}
+            );
+            marker_bd8923150184cf54d1a45582a069dd82.setIcon(icon_35aa794fbff14510eb2b065f7d485255);
+        
+    
+        var popup_8fc59c174f2704f10d8d4b274f617d30 = L.popup({"maxWidth": "100%"});
+
+        
+            var html_dbcbd98e60370b5950bfa30acbc4a225 = $(`<div id="html_dbcbd98e60370b5950bfa30acbc4a225" style="width: 100.0%; height: 100.0%;"><iframe src="https://andytertzakian.github.io/chargedup.github.io/maps/5565_51st_St.html" width="850" height="400"  frameborder="0"></div>`)[0];
+            popup_8fc59c174f2704f10d8d4b274f617d30.setContent(html_dbcbd98e60370b5950bfa30acbc4a225);
+        
+
+        marker_bd8923150184cf54d1a45582a069dd82.bindPopup(popup_8fc59c174f2704f10d8d4b274f617d30)
+        ;
+
+        
+    
+    
+            var marker_002882c6477aeca4655458b3e6988eca = L.marker(
+                [40.0126607, -105.2571956],
+                {}
+            ).addTo(map_db23cd53f597577b20d2b0460134494a);
+        
+    
+            var icon_7d75aa8a183054be2ccfa088c93d02c7 = L.AwesomeMarkers.icon(
+                {"extraClasses": "fa-rotate-0", "icon": "bolt", "iconColor": "white", "markerColor": "red", "prefix": "fa-solid fa"}
+            );
+            marker_002882c6477aeca4655458b3e6988eca.setIcon(icon_7d75aa8a183054be2ccfa088c93d02c7);
+        
+    
+        var popup_83d2a0677d4056f05c9bd00d0588bf22 = L.popup({"maxWidth": "100%"});
+
+        
+            var html_f6f591f809cb0f2c27d1ca8e029b2af4 = $(`<div id="html_f6f591f809cb0f2c27d1ca8e029b2af4" style="width: 100.0%; height: 100.0%;"><iframe src="https://andytertzakian.github.io/chargedup.github.io/maps/1505_30th_St.html" width="850" height="400"  frameborder="0"></div>`)[0];
+            popup_83d2a0677d4056f05c9bd00d0588bf22.setContent(html_f6f591f809cb0f2c27d1ca8e029b2af4);
+        
+
+        marker_002882c6477aeca4655458b3e6988eca.bindPopup(popup_83d2a0677d4056f05c9bd00d0588bf22)
+        ;
+
+        
+    
+    
+            var marker_a2ab069a52fd1e2238f6c42b101af92e = L.marker(
+                [40.0373216, -105.2327793],
+                {}
+            ).addTo(map_db23cd53f597577b20d2b0460134494a);
+        
+    
+            var icon_2a73628f0dda76468284f175fa9a68eb = L.AwesomeMarkers.icon(
+                {"extraClasses": "fa-rotate-0", "icon": "bolt", "iconColor": "white", "markerColor": "red", "prefix": "fa-solid fa"}
+            );
+            marker_a2ab069a52fd1e2238f6c42b101af92e.setIcon(icon_2a73628f0dda76468284f175fa9a68eb);
+        
+    
+        var popup_d30045100c4c39bfcbd5afce8a38f252 = L.popup({"maxWidth": "100%"});
+
+        
+            var html_a2a4ac916188b34b8fd6a31230ffaf1e = $(`<div id="html_a2a4ac916188b34b8fd6a31230ffaf1e" style="width: 100.0%; height: 100.0%;"><iframe src="https://andytertzakian.github.io/chargedup.github.io/maps/3335_Airport_Rd.html" width="850" height="400"  frameborder="0"></div>`)[0];
+            popup_d30045100c4c39bfcbd5afce8a38f252.setContent(html_a2a4ac916188b34b8fd6a31230ffaf1e);
+        
+
+        marker_a2ab069a52fd1e2238f6c42b101af92e.bindPopup(popup_d30045100c4c39bfcbd5afce8a38f252)
+        ;
+
+        
+    
+    
+            var marker_979e945010e6057efa3ad7a24a94e113 = L.marker(
+                [39.9987901, -105.2848274],
+                {}
+            ).addTo(map_db23cd53f597577b20d2b0460134494a);
+        
+    
+            var icon_582e5f3633c5d12f111fc15fa8d73596 = L.AwesomeMarkers.icon(
+                {"extraClasses": "fa-rotate-0", "icon": "bolt", "iconColor": "white", "markerColor": "red", "prefix": "fa-solid fa"}
+            );
+            marker_979e945010e6057efa3ad7a24a94e113.setIcon(icon_582e5f3633c5d12f111fc15fa8d73596);
+        
+    
+        var popup_4a1bc295250efdcc57a8656b7a4beddc = L.popup({"maxWidth": "100%"});
+
+        
+            var html_df6c0d2f34ee8fe513e6b3a1d3bf8a9f = $(`<div id="html_df6c0d2f34ee8fe513e6b3a1d3bf8a9f" style="width: 100.0%; height: 100.0%;"><iframe src="https://andytertzakian.github.io/chargedup.github.io/maps/600_Baseline_Rd.html" width="850" height="400"  frameborder="0"></div>`)[0];
+            popup_4a1bc295250efdcc57a8656b7a4beddc.setContent(html_df6c0d2f34ee8fe513e6b3a1d3bf8a9f);
+        
+
+        marker_979e945010e6057efa3ad7a24a94e113.bindPopup(popup_4a1bc295250efdcc57a8656b7a4beddc)
+        ;
+
+        
+    
+    
+            var marker_d1f474c6a15db6db792a2074e41598ed = L.marker(
+                [40.0253516, -105.2845029],
+                {}
+            ).addTo(map_db23cd53f597577b20d2b0460134494a);
+        
+    
+            var icon_0b05e670df08a5a268908ea7cb132aa0 = L.AwesomeMarkers.icon(
+                {"extraClasses": "fa-rotate-0", "icon": "bolt", "iconColor": "white", "markerColor": "red", "prefix": "fa-solid fa"}
+            );
+            marker_d1f474c6a15db6db792a2074e41598ed.setIcon(icon_0b05e670df08a5a268908ea7cb132aa0);
+        
+    
+        var popup_048b61abbd75c8bf79fa7675bcb80415 = L.popup({"maxWidth": "100%"});
+
+        
+            var html_9c7734c7bd7ecd06ef5d7b138fa0a04e = $(`<div id="html_9c7734c7bd7ecd06ef5d7b138fa0a04e" style="width: 100.0%; height: 100.0%;"><iframe src="https://andytertzakian.github.io/chargedup.github.io/maps/2667_Broadway.html" width="850" height="400"  frameborder="0"></div>`)[0];
+            popup_048b61abbd75c8bf79fa7675bcb80415.setContent(html_9c7734c7bd7ecd06ef5d7b138fa0a04e);
+        
+
+        marker_d1f474c6a15db6db792a2074e41598ed.bindPopup(popup_048b61abbd75c8bf79fa7675bcb80415)
+        ;
+
+        
+    
+    
+            var marker_d8b960a6902ea299b39fb66fc8c69c13 = L.marker(
+                [40.0297918, -105.2320102],
+                {}
+            ).addTo(map_db23cd53f597577b20d2b0460134494a);
+        
+    
+            var icon_e102bbe4dde2b550727abae9c04db6da = L.AwesomeMarkers.icon(
+                {"extraClasses": "fa-rotate-0", "icon": "bolt", "iconColor": "white", "markerColor": "red", "prefix": "fa-solid fa"}
+            );
+            marker_d8b960a6902ea299b39fb66fc8c69c13.setIcon(icon_e102bbe4dde2b550727abae9c04db6da);
+        
+    
+        var popup_b22f90f8fa215a61b58de2cae7cb41a2 = L.popup({"maxWidth": "100%"});
+
+        
+            var html_59df86757299136a3d1db6f0e17de8dd = $(`<div id="html_59df86757299136a3d1db6f0e17de8dd" style="width: 100.0%; height: 100.0%;"><iframe src="https://andytertzakian.github.io/chargedup.github.io/maps/5333_Valmont_Rd.html" width="850" height="400"  frameborder="0"></div>`)[0];
+            popup_b22f90f8fa215a61b58de2cae7cb41a2.setContent(html_59df86757299136a3d1db6f0e17de8dd);
+        
+
+        marker_d8b960a6902ea299b39fb66fc8c69c13.bindPopup(popup_b22f90f8fa215a61b58de2cae7cb41a2)
+        ;
+
+        
+    
+</script>
