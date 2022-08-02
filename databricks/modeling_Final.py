@@ -260,13 +260,37 @@ def write_model_to_s3(model, model_name):
     key=f'models/{model_name}.pkl'
     
     client = boto3.client("s3",
-        aws_access_key_id=aws_access_key,
-        aws_secret_access_key=aws_secret_key,
+        aws_access_key_id=access_key,
+        aws_secret_access_key=secret_key,
     )
 
     pickle_byte_obj = pickle.dumps(model) 
 
     client.put_object(Key=key, Body=pickle_byte_obj, Bucket="w210v2")
+    
+    
+
+    
+def dictstodf(dict1, dict2, dict3, modeltype, features='No'):
+    emptyd = dict()
+    emptyd.update(dict1)
+    emptyd.update(dict2)
+    emptyd.update(dict3)
+    
+    
+    df = pd.DataFrame.from_dict({(i,j): emptyd[i][j] 
+                           for i in emptyd.keys() 
+                           for j in emptyd[i].keys()},
+                       orient='index')
+
+    df.reset_index(inplace=True)
+
+    df = df.rename(columns={"level_0":"city", "level_1":"station", "RMSE":"RMSE_round"})
+    df['Model'] = str(modeltype)
+    df['Features'] = str(features)
+    
+    print(df.shape)
+    return df
 
 # COMMAND ----------
 
@@ -732,6 +756,86 @@ def plot_predictions(model, X_test, y_test, train_df, station, train_end, date_c
 
 # COMMAND ----------
 
+# DBTITLE 1,Benchmark Model functions
+def calc_rmse(preds, actuals):
+    """
+    Calculate the RMSE between predictions and the actual values
+    preds: series/array of predictions
+    df: dataframe with column 'ports_available' to be used in calculation
+    """
+    mse_score = mse(preds, actuals)
+    rmse_score = np.sqrt(mse_score)
+    
+    return mse_score, rmse_score
+
+
+def predict_average_overall(df, n_out, actualcol):
+    """
+    Use the entire training set to make predictions of ports available
+    """
+    predictions = [df[actualcol].mean()] * n_out
+    roundedpredictions = [np.round(df[actualcol].mean())] * n_out
+    
+    return predictions, roundedpredictions
+
+
+def predict_average_n_timestamps(df, n_in, n_out, actualcol):
+    """
+    Use the last n_in timesteps only to make predictions of ports available for n_out timesteps out
+    """
+    
+    # Get the last n_in entries from the ports available column
+    train_set = list(df.tail(n_in)[actualcol])
+    
+    # Define list for the predictions
+    preds = []
+    preds_round = []
+    
+    # For each prediction you want to make
+    for i in range(n_out):
+        # Make the prediction based on the mean of the train set
+        prediction = np.mean(train_set)
+        prediction_round = np.round(prediction)
+        
+        # Update the predictions list
+        preds.append(prediction)
+        preds_round.append(prediction_round)
+        
+        # Update the training set by using the prediction from the last timestep and dropping the first timestep
+        train_set.append(prediction)
+        train_set.pop(0)
+    
+    return preds, preds_round
+
+
+
+
+def predict_avg_by_day_hour(df, df_test, datecol, actualcol):
+    """
+    Make predictions based on the day of week and the hour of day -- return the average
+    """
+    df_mod = df.copy()
+    df_test_mod = df_test.copy()
+    
+    # Add day of week and hour columns
+    df_mod.loc[:,'day_of_week'] = df[datecol].dt.dayofweek
+    df_mod.loc[:,'Hour'] = df[datecol].dt.hour
+    df_test_mod.loc[:,'day_of_week'] = df_test[datecol].dt.dayofweek
+    df_test_mod.loc[:,'Hour'] = df_test[datecol].dt.hour
+    
+    # Group by these features, calculate the mean, rename the column
+    df_grouped = df_mod.groupby(['day_of_week', 'Hour']).mean()
+    df_grouped = df_grouped.rename(columns = {actualcol: 'Predictions'})
+    df_grouped.loc[:,'Predictions_Rounded'] = df_grouped['Predictions']
+    df_grouped = df_grouped.round({'Predictions_Rounded': 0})
+    df_grouped = df_grouped.reset_index()
+    
+    df_preds = df_test_mod.merge(df_grouped, how = 'left', on = ['day_of_week', 'Hour'])
+    
+    return df_preds
+
+# COMMAND ----------
+
 # MAGIC %md
 # MAGIC ## Load Datasets
 
@@ -1098,7 +1202,537 @@ print(result)
 # MAGIC - ARIMA Models
 # MAGIC - FB Prophet
 # MAGIC - LSTM Models
-# MAGIC - CNN Models
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC # Benchmark Models
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC ## Simple Average
+
+# COMMAND ----------
+
+actual_col = 'Ports Available'
+
+## split into train and test
+traindf, testdf = split2_TrainTest(slrp_feat, 0.7)
+
+avg_predictions, avg_roundpredictions = predict_average_overall(traindf, testdf.shape[0], actual_col)
+
+testdf.loc[:,'Predictions'] = avg_predictions
+testdf.loc[:,'Predictions_Rounded'] = avg_roundpredictions
+
+testdf = testdf[['DateTime', actual_col, 'Predictions', 'Predictions_Rounded']]
+testdf.loc[:,'Location'] = 'Berkeley'
+testdf.loc[:,'SiteName'] = 'Slrp'
+testdf.loc[:,'Features'] = 'No'
+testdf.loc[:,'Model'] = 'Simple Average'
+
+slrp_avg_model = testdf.rename(columns={actual_col: "Actuals"})
+
+#### write dataframe to s3
+#write_to_s3(slrp_avg_model, "BerkeleySlrp_BenchmarkSimpleAvg")
+
+
+
+
+MSE_Raw, RMSE_Raw = calc_rmse(slrp_avg_model['Predictions'], slrp_avg_model['Actuals'])
+MSE_round, RMSE_round = calc_rmse(slrp_avg_model['Predictions_Rounded'], slrp_avg_model['Actuals'])
+
+Berkeley_simpleavg = dict({'Slrp': 
+                 dict({'MSE_Raw': MSE_Raw,
+                      'MSE_round': MSE_round,
+                      'RMSE_Raw': RMSE_Raw,
+                      'RMSE': RMSE_round}) 
+                 }) 
+
+print(Berkeley_simpleavg)
+
+# COMMAND ----------
+
+actual_col = 'Ports Available'
+
+## split into train and test
+traindf, testdf = split2_TrainTest(slrp_feat, 0.7)
+
+avg_predictions, avg_roundpredictions = predict_average_overall(traindf, testdf.shape[0], actual_col)
+
+testdf.loc[:,'Predictions'] = avg_predictions
+testdf.loc[:,'Predictions_Rounded'] = avg_roundpredictions
+
+testdf = testdf[['DateTime', actual_col, 'Predictions', 'Predictions_Rounded']]
+testdf.loc[:,'Location'] = 'Berkeley'
+testdf.loc[:,'SiteName'] = 'Slrp'
+testdf.loc[:,'Features'] = 'No'
+testdf.loc[:,'Model'] = 'Simple Average'
+
+slrp_avg_model = testdf.rename(columns={actual_col: "Actuals"})
+
+#### write dataframe to s3
+write_to_s3(slrp_avg_model, "BerkeleySlrp_BenchmarkSimpleAvg")
+
+
+
+
+MSE_Raw, RMSE_Raw = calc_rmse(slrp_avg_model['Predictions'], slrp_avg_model['Actuals'])
+
+MSE_round, RMSE_round = calc_rmse(slrp_avg_model['Predictions_Rounded'], slrp_avg_model['Actuals'])
+
+Berkeley_simpleavg = dict({'Slrp': 
+                 dict({'MSE_Raw': MSE_Raw,
+                      'MSE_round': MSE_round,
+                      'RMSE_Raw': RMSE_Raw,
+                      'RMSE': RMSE_round}) 
+                 }) 
+
+print(Berkeley_simpleavg)
+
+# COMMAND ----------
+
+### simple average
+pa_results_df = pd.DataFrame()
+pa_metrics = dict()
+
+loc_ = 'PaloAlto'
+date_col = 'datetime_pac'
+actual_col= 'Ports_Available'
+stationcol = 'Station_Location'
+
+stations = paloalto_feat[stationcol].unique()
+
+
+for station in stations: 
+    # split into train and test
+    stationdf = paloalto_feat[paloalto_feat[stationcol] == station]
+    traindf, testdf = split2_TrainTest(stationdf, 0.7)
+    
+    # predict
+    avg_predictions, avg_roundpredictions = predict_average_overall(traindf, testdf.shape[0], actual_col)
+    testdf.loc[:,'Predictions'] = avg_predictions
+    testdf.loc[:,'Predictions_Rounded'] = avg_roundpredictions
+
+    testdf = testdf[[date_col, actual_col, 'Predictions', 'Predictions_Rounded']]
+    testdf.loc[:,'Location'] = str(loc_)
+    testdf.loc[:,'SiteName'] = str(station)
+    testdf.loc[:,'Features'] = 'No'
+    testdf.loc[:,'Model'] = 'Simple Average'
+
+    testdf = testdf.rename(columns={actual_col: "Actuals"})
+    
+    # metrics
+    MSE_Raw, RMSE_Raw = calc_rmse(testdf['Predictions'], testdf['Actuals'])
+    MSE_round, RMSE_round = calc_rmse(testdf['Predictions_Rounded'], testdf['Actuals'])
+
+    evals = dict({str(station): 
+                     dict({'MSE_Raw': MSE_Raw,
+                          'MSE_round': MSE_round,
+                          'RMSE_Raw': RMSE_Raw,
+                          'RMSE': RMSE_round}) 
+                     }) 
+    print(evals)
+    
+    pa_metrics.update(evals)
+    print(pa_metrics)
+    ##### append each station df to results df
+    pa_results_df = pa_results_df.append(testdf)
+
+
+#### write dataframe to s3
+write_to_s3(pa_results_df, "PaloAlto_BenchmarkSimpleAvg")
+
+# COMMAND ----------
+
+### simple average
+bo_results_df = pd.DataFrame()
+bo_metrics = dict()
+
+
+loc_ = 'Boulder'
+date_col = 'Date Time'
+actual_col= 'Ports Available'
+stationcol = 'Station'
+
+
+stations = boulder_feat[stationcol].unique()
+
+
+for station in stations: 
+    stationdf = boulder_feat[boulder_feat[stationcol] == station]
+    # split into train and test
+    traindf, testdf = split2_TrainTest(stationdf, 0.7)
+    
+    # predict
+    avg_predictions, avg_roundpredictions = predict_average_overall(traindf, testdf.shape[0], actual_col)
+    testdf.loc[:,'Predictions'] = avg_predictions
+    testdf.loc[:,'Predictions_Rounded'] = avg_roundpredictions
+
+    testdf = testdf[[date_col, actual_col, 'Predictions', 'Predictions_Rounded']]
+    testdf.loc[:,'Location'] = str(loc_)
+    testdf.loc[:,'SiteName'] = str(station)
+    testdf.loc[:,'Features'] = 'No'
+    testdf.loc[:,'Model'] = 'Simple Average'
+
+    testdf = testdf.rename(columns={actual_col: "Actuals"})
+    
+    # metrics
+    MSE_Raw, RMSE_Raw = calc_rmse(testdf['Predictions'], testdf['Actuals'])
+    MSE_round, RMSE_round = calc_rmse(testdf['Predictions_Rounded'], testdf['Actuals'])
+
+    evals = dict({str(station): 
+                     dict({'MSE_Raw': MSE_Raw,
+                          'MSE_round': MSE_round,
+                          'RMSE_Raw': RMSE_Raw,
+                          'RMSE': RMSE_round}) 
+                     }) 
+    print(evals)
+    
+    bo_metrics.update(evals)
+    print(bo_metrics)
+    ##### append each station df to results df
+    bo_results_df = bo_results_df.append(testdf)
+
+
+# #### write dataframe to s3
+write_to_s3(bo_results_df, "Boulder_BenchmarkSimpleAvg")
+
+# COMMAND ----------
+
+berkeley_simp = {'Berkeley': {'Slrp': {'MSE_Raw': 1.617500235370586, 'MSE_round': 1.559842095819128, 'RMSE_Raw': 1.2718098267314126, 'RMSE': 1.2489363858175995}}}
+paloalto_simp = {'Palo Alto': {'BRYANT': {'MSE_Raw': 6.073218129737852, 'MSE_round': 5.996411268616544, 'RMSE_Raw': 2.464390011694142, 'RMSE': 2.448757086486233}, 'HAMILTON': {'MSE_Raw': 1.379941540385773, 'MSE_round': 1.458819307374843, 'RMSE_Raw': 1.1747091301193555, 'RMSE': 1.207815924458211}, 'CAMBRIDGE': {'MSE_Raw': 4.9843585087397635, 'MSE_round': 4.89413242418805, 'RMSE_Raw': 2.232567694100173, 'RMSE': 2.212268614835922}, 'HIGH': {'MSE_Raw': 4.1348313109883845, 'MSE_round': 4.145881930737485, 'RMSE_Raw': 2.033428462225407, 'RMSE': 2.036143887532874}, 'MPL': {'MSE_Raw': 0.9773685162786255, 'MSE_round': 0.997308451462408, 'RMSE_Raw': 0.9886195002520562, 'RMSE': 0.9986533189562873}, 'TED_THOMPSON': {'MSE_Raw': 3.0784780918514723, 'MSE_round': 3.2971469585501527, 'RMSE_Raw': 1.754559230077877, 'RMSE': 1.8158047688422212}, 'WEBSTER': {'MSE_Raw': 3.820571119040337, 'MSE_round': 3.8273820204557687, 'RMSE_Raw': 1.954628128069464, 'RMSE': 1.9563696022111385}, 'RINCONADA_LIB': {'MSE_Raw': 0.7501454139488949, 'MSE_round': 0.8133859680602907, 'RMSE_Raw': 0.8661093544979727, 'RMSE': 0.901879131624793}}}
+
+boulder_simp = {'Boulder' : {'1505 30th St': {'MSE_Raw': 0.9194707186270493, 'MSE_round': 0.9700340929481428, 'RMSE_Raw': 0.9588903579800192, 'RMSE': 0.9849030880996072}, '600 Baseline Rd': {'MSE_Raw': 0.1729638840956741, 'MSE_round': 0.1733357258209223, 'RMSE_Raw': 0.4158892690316427, 'RMSE': 0.41633607316796645}, '1400 Walnut St': {'MSE_Raw': 0.11128820622952669, 'MSE_round': 0.12076081105329266, 'RMSE_Raw': 0.33359887024617857, 'RMSE': 0.34750656260464013}, '1739 Broadway': {'MSE_Raw': 0.1345069095544081, 'MSE_round': 0.13978108738560918, 'RMSE_Raw': 0.36675183647039605, 'RMSE': 0.37387308994578516}, '3172 Broadway': {'MSE_Raw': 0.38147901168742665, 'MSE_round': 0.5058316884981159, 'RMSE_Raw': 0.6176398721645379, 'RMSE': 0.7112184534291246}, '900 Walnut St': {'MSE_Raw': 0.3327507475240159, 'MSE_round': 0.4017584783778934, 'RMSE_Raw': 0.5768455144352046, 'RMSE': 0.633844206708473}, '1770 13th St': {'MSE_Raw': 0.10640227101757901, 'MSE_round': 0.11232729230217119, 'RMSE_Raw': 0.32619360971297245, 'RMSE': 0.33515264030314784}, '3335 Airport Rd': {'MSE_Raw': 0.11758828628160437, 'MSE_round': 0.12757940068185897, 'RMSE_Raw': 0.34291148461608045, 'RMSE': 0.35718258731614977}, '1100 Walnut': {'MSE_Raw': 0.2762144421998442, 'MSE_round': 0.3324959626771936, 'RMSE_Raw': 0.5255610737106052, 'RMSE': 0.5766246289200572}, '1500 Pearl St': {'MSE_Raw': 0.4961217917069463, 'MSE_round': 0.7611699264310067, 'RMSE_Raw': 0.7043591354607012, 'RMSE': 0.8724505295035396}, '1745 14th street': {'MSE_Raw': 0.23469423954535246, 'MSE_round': 0.35618158980800285, 'RMSE_Raw': 0.48445251526372785, 'RMSE': 0.59680950881165}, '5660 Sioux Dr': {'MSE_Raw': 0.12977262666556802, 'MSE_round': 0.1449847478916203, 'RMSE_Raw': 0.3602396794712765, 'RMSE': 0.38076862776707365}, '2667 Broadway': {'MSE_Raw': 0.06380580105242177, 'MSE_round': 0.06818589628566302, 'RMSE_Raw': 0.25259810183851694, 'RMSE': 0.26112429279112087}, '1360 Gillaspie Dr': {'MSE_Raw': 0.2392659857827969, 'MSE_round': 0.2822537233088103, 'RMSE_Raw': 0.4891482247568695, 'RMSE': 0.5312755624991707}, '5565 51st St': {'MSE_Raw': 0.018889062821175306, 'MSE_round': 0.019020276332316528, 'RMSE_Raw': 0.13743748695743568, 'RMSE': 0.13791401789635646}, '5333 Valmont Rd': {'MSE_Raw': 0.34890315218262796, 'MSE_round': 0.39422214247263593, 'RMSE_Raw': 0.5906802452957336, 'RMSE': 0.6278711193172019}, '1100 Spruce St': {'MSE_Raw': 0.3796244133161643, 'MSE_round': 0.48968239727256413, 'RMSE_Raw': 0.6161366839558933, 'RMSE': 0.699773104136308}, '2052 Junction Pl': {'MSE_Raw': 0.15150822022974003, 'MSE_round': 0.17190023326753992, 'RMSE_Raw': 0.38924056858161643, 'RMSE': 0.4146085301432424}}}
+
+simpleavg =  dictstodf(berkeley_simp, paloalto_simp, boulder_simp, 'Simple Average','No')
+simpleavg
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC ## Predict Average by Day/Hour
+
+# COMMAND ----------
+
+date_col = 'DateTime'
+actual_col = 'Ports Available'
+
+
+traindf, testdf = split2_TrainTest(slrp_feat, 0.7)
+Berkely_avgDayHour =  predict_avg_by_day_hour(traindf, testdf, date_col, actual_col)
+
+
+Berkely_avgDayHour = Berkely_avgDayHour[[date_col, actual_col, 'Predictions', 'Predictions_Rounded']]
+Berkely_avgDayHour.loc[:,'Location'] = 'Berkeley'
+Berkely_avgDayHour.loc[:,'SiteName'] = 'Slrp'
+Berkely_avgDayHour.loc[:,'Features'] = 'Yes'
+Berkely_avgDayHour.loc[:,'Model'] = 'Average: Day of Week and Hour'
+
+Berkely_avgDayHour = Berkely_avgDayHour.rename(columns={actual_col: "Actuals"})
+
+# #### write dataframe to s3
+write_to_s3(Berkely_avgDayHour, "BerkeleySlrp_BenchmarkDayHourAvg")
+
+
+
+
+MSE_Raw, RMSE_Raw = calc_rmse(Berkely_avgDayHour['Predictions'], Berkely_avgDayHour['Actuals'])
+MSE_round, RMSE_round = calc_rmse(Berkely_avgDayHour['Predictions_Rounded'], Berkely_avgDayHour['Actuals'])
+
+Berkeley_avgDayWeekHour = dict({'Slrp': 
+                 dict({'MSE_Raw': MSE_Raw,
+                      'MSE_round': MSE_round,
+                      'RMSE_Raw': RMSE_Raw,
+                      'RMSE': RMSE_round}) 
+                 }) 
+
+print(Berkeley_avgDayWeekHour)
+
+# COMMAND ----------
+
+### average day of week and hour
+pa_results_df = pd.DataFrame()
+pa_metrics = dict()
+
+loc_ = 'PaloAlto'
+date_col = 'datetime_pac'
+actual_col= 'Ports_Available'
+stationcol = 'Station_Location'
+
+stations = paloalto_feat[stationcol].unique()
+
+
+
+for station in stations:
+    stationdf = paloalto_feat[paloalto_feat[stationcol] == station]
+    traindf, testdf = split2_TrainTest(stationdf, 0.7)
+    
+    station_avgDayHour =  predict_avg_by_day_hour(traindf, testdf, date_col, actual_col)
+    station_avgDayHour = station_avgDayHour[[date_col, actual_col, 'Predictions', 'Predictions_Rounded']]
+    station_avgDayHour.loc[:,'Location'] = str(loc_)
+    station_avgDayHour.loc[:,'SiteName'] = str(station)
+    station_avgDayHour.loc[:,'Features'] = 'Yes'
+    station_avgDayHour.loc[:,'Model'] = 'Average: Day of Week and Hour'
+
+    station_avgDayHour = station_avgDayHour.rename(columns={actual_col: "Actuals", date_col: 'DateTime'})
+
+
+    MSE_Raw, RMSE_Raw = calc_rmse(station_avgDayHour['Predictions'], station_avgDayHour['Actuals'])
+    MSE_round, RMSE_round = calc_rmse(station_avgDayHour['Predictions_Rounded'], station_avgDayHour['Actuals'])
+
+    evals = dict({str(station): 
+                     dict({'MSE_Raw': MSE_Raw,
+                          'MSE_round': MSE_round,
+                          'RMSE_Raw': RMSE_Raw,
+                          'RMSE': RMSE_round}) 
+                     }) 
+
+    print(evals)
+    
+    pa_metrics.update(evals)
+    ##### append each station df to results df
+    pa_results_df = pa_results_df.append(station_avgDayHour)
+
+
+print(pa_metrics)
+pa_results_df     
+    
+# #### write dataframe to s3
+write_to_s3(pa_results_df , "PaloAlto_BenchmarkDayHourAvg")
+
+
+# COMMAND ----------
+
+### average day of week and hour
+####### No Features ######### 
+bo_results_df = pd.DataFrame()
+bo_metrics = dict()
+
+loc_ = 'Boulder'
+date_col = 'Date Time'
+actual_col= 'Ports Available'
+stationcol = 'Station'
+
+stations = boulder_feat[stationcol].unique()
+
+
+for station in stations:
+    stationdf = boulder_feat[boulder_feat[stationcol] == station]
+    traindf, testdf = split2_TrainTest(stationdf, 0.7)
+    
+    station_avgDayHour =  predict_avg_by_day_hour(traindf, testdf, date_col, actual_col)
+    station_avgDayHour = station_avgDayHour[[date_col, actual_col, 'Predictions', 'Predictions_Rounded']]
+    station_avgDayHour.loc[:,'Location'] = str(loc_)
+    station_avgDayHour.loc[:,'SiteName'] = str(station)
+    station_avgDayHour.loc[:,'Features'] = 'Yes'
+    station_avgDayHour.loc[:,'Model'] = 'Average: Day of Week and Hour'
+
+    station_avgDayHour = station_avgDayHour.rename(columns={actual_col: "Actuals", date_col: 'DateTime'})
+
+
+    MSE_Raw, RMSE_Raw = calc_rmse(station_avgDayHour['Predictions'], station_avgDayHour['Actuals'])
+    MSE_round, RMSE_round = calc_rmse(station_avgDayHour['Predictions_Rounded'], station_avgDayHour['Actuals'])
+
+    evals = dict({str(station): 
+                     dict({'MSE_Raw': MSE_Raw,
+                          'MSE_round': MSE_round,
+                          'RMSE_Raw': RMSE_Raw,
+                          'RMSE': RMSE_round}) 
+                     }) 
+
+    print(evals)
+    
+    bo_metrics.update(evals)
+    ##### append each station df to results df
+    bo_results_df = bo_results_df.append(station_avgDayHour)
+
+
+print(bo_metrics)
+bo_results_df     
+    
+# #### write dataframe to s3
+write_to_s3(bo_results_df , "Boulder_BenchmarkDayHourAvg")
+
+# COMMAND ----------
+
+Berkeley_avgDayWeekHour = {'Berkeley': {'Slrp': {'MSE_Raw': 0.8515220380201735, 'MSE_round': 0.9438363538489144, 'RMSE_Raw': 0.9227795175556149, 'RMSE': 0.9715124054014516}}}
+
+PaloAlto_avgDayWeekHour = {'Palo Alto' : {'BRYANT': {'MSE_Raw': 2.845388021784769, 'MSE_round': 2.923739458101561, 'RMSE_Raw': 1.6868277984977509, 'RMSE': 1.7098945751424446}, 'HAMILTON': {'MSE_Raw': 0.6081415235769522, 'MSE_round': 0.6666068544769423, 'RMSE_Raw': 0.7798342923832936, 'RMSE': 0.816459952769848}, 'CAMBRIDGE': {'MSE_Raw': 2.3142438100288527, 'MSE_round': 2.388839045397452, 'RMSE_Raw': 1.5212638857308263, 'RMSE': 1.545586958212786}, 'HIGH': {'MSE_Raw': 1.8663400034481212, 'MSE_round': 1.9502960703391352, 'RMSE_Raw': 1.3661405504003317, 'RMSE': 1.3965300105401013}, 'MPL': {'MSE_Raw': 0.6200379789930767, 'MSE_round': 0.710389377355105, 'RMSE_Raw': 0.7874249037165872, 'RMSE': 0.8428459985994505}, 'TED_THOMPSON': {'MSE_Raw': 1.4617882862764269, 'MSE_round': 1.5309528081823076, 'RMSE_Raw': 1.2090443690272192, 'RMSE': 1.2373167776209566}, 'WEBSTER': {'MSE_Raw': 1.4339645865582613, 'MSE_round': 1.504755069083079, 'RMSE_Raw': 1.197482603864566, 'RMSE': 1.2266845841874263}, 'RINCONADA_LIB': {'MSE_Raw': 0.6699918853407785, 'MSE_round': 0.8462228602189126, 'RMSE_Raw': 0.8185303203551952, 'RMSE': 0.9199037233422379}}}
+
+Boulder_avgDayWeekHour = {'Boulder' : {'1505 30th St': {'MSE_Raw': 0.7749564046694093, 'MSE_round': 0.8867755248519649, 'RMSE_Raw': 0.8803160822508068, 'RMSE': 0.941687594084134}, '600 Baseline Rd': {'MSE_Raw': 0.16506183792957613, 'MSE_round': 0.20958191279382737, 'RMSE_Raw': 0.40627803033092513, 'RMSE': 0.4578011716824536}, '1400 Walnut St': {'MSE_Raw': 0.10766495718237634, 'MSE_round': 0.12076081105329266, 'RMSE_Raw': 0.3281233871310857, 'RMSE': 0.34750656260464013}, '1739 Broadway': {'MSE_Raw': 0.13529551970127407, 'MSE_round': 0.13978108738560918, 'RMSE_Raw': 0.36782539295333333, 'RMSE': 0.37387308994578516}, '3172 Broadway': {'MSE_Raw': 0.2920019348272951, 'MSE_round': 0.3830970751839225, 'RMSE_Raw': 0.540372033720561, 'RMSE': 0.6189483622919787}, '900 Walnut St': {'MSE_Raw': 0.28208770614117823, 'MSE_round': 0.32424188049524494, 'RMSE_Raw': 0.5311192955835612, 'RMSE': 0.5694224095478198}, '1770 13th St': {'MSE_Raw': 0.10650559462223531, 'MSE_round': 0.11232729230217119, 'RMSE_Raw': 0.326351949009402, 'RMSE': 0.33515264030314784}, '3335 Airport Rd': {'MSE_Raw': 0.10615413164792727, 'MSE_round': 0.1394222142472636, 'RMSE_Raw': 0.325813031734348, 'RMSE': 0.3733928417193661}, '1100 Walnut': {'MSE_Raw': 0.23898444342946074, 'MSE_round': 0.31024582809976675, 'RMSE_Raw': 0.4888603516644204, 'RMSE': 0.5569971526855113}, '1500 Pearl St': {'MSE_Raw': 0.45666009305369665, 'MSE_round': 0.5684550511394222, 'RMSE_Raw': 0.6757663006200417, 'RMSE': 0.7539595819003975}, '1745 14th street': {'MSE_Raw': 0.25758945768183905, 'MSE_round': 0.49345056522519287, 'RMSE_Raw': 0.5075327158734095, 'RMSE': 0.7024603655902537}, '5660 Sioux Dr': {'MSE_Raw': 0.12442226365026655, 'MSE_round': 0.1530593935043962, 'RMSE_Raw': 0.35273540175359, 'RMSE': 0.39122805817629724}, '2667 Broadway': {'MSE_Raw': 0.07468010960147081, 'MSE_round': 0.06818589628566302, 'RMSE_Raw': 0.2732766173705149, 'RMSE': 0.26112429279112087}, '1360 Gillaspie Dr': {'MSE_Raw': 0.21791167515766227, 'MSE_round': 0.28010048447873676, 'RMSE_Raw': 0.46681010610060947, 'RMSE': 0.5292452026034216}, '5565 51st St': {'MSE_Raw': 0.01884190151799091, 'MSE_round': 0.019020276332316528, 'RMSE_Raw': 0.13726580607708136, 'RMSE': 0.13791401789635646}, '5333 Valmont Rd': {'MSE_Raw': 0.3237217497545316, 'MSE_round': 0.35725820922303964, 'RMSE_Raw': 0.568965508404975, 'RMSE': 0.5977108073500426}, '1100 Spruce St': {'MSE_Raw': 0.3012725423487835, 'MSE_round': 0.428673963753813, 'RMSE_Raw': 0.5488829951353781, 'RMSE': 0.6547319785636051}, '2052 Junction Pl': {'MSE_Raw': 0.15517270934023814, 'MSE_round': 0.17190023326753992, 'RMSE_Raw': 0.39391967371564235, 'RMSE': 0.4146085301432424}}}
+
+avgDayHour =  dictstodf(Berkeley_avgDayWeekHour, PaloAlto_avgDayWeekHour, Boulder_avgDayWeekHour, 'Average DayofWeek Hour','Yes')
+avgDayHour
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC ## Average last 12 inputs and predict next
+
+# COMMAND ----------
+
+date_col = 'DateTime'
+actual_col = 'Ports Available'
+
+
+traindf, testdf = split2_TrainTest(slrp_feat, 0.7)
+predictions, predictions_round =  predict_average_n_timestamps(traindf, 12, testdf.shape[0], actual_col)
+
+testdf.loc[:, 'Predictions'] = predictions
+testdf.loc[:, 'Predictions_Rounded'] = predictions_round
+
+Berkeley_last12df = testdf[[date_col, actual_col, 'Predictions', 'Predictions_Rounded']]
+Berkeley_last12df.loc[:,'Location'] = 'Berkeley'
+Berkeley_last12df.loc[:,'SiteName'] = 'Slrp'
+Berkeley_last12df.loc[:,'Features'] = 'No'
+Berkeley_last12df.loc[:,'Model'] = 'Average: Last 12'
+
+Berkeley_last12df = Berkeley_last12df.rename(columns={actual_col: "Actuals", date_col: 'DateTime'})
+
+
+# #### write dataframe to s3
+write_to_s3(Berkeley_last12df, "BerkeleySlrp_BenchmarkAvgLast12")
+
+
+
+MSE_Raw, RMSE_Raw = calc_rmse(Berkeley_last12df['Predictions'], Berkeley_last12df['Actuals'])
+MSE_round, RMSE_round = calc_rmse(Berkeley_last12df['Predictions_Rounded'], Berkeley_last12df['Actuals'])
+
+Berkeley_last12 = dict({'Slrp': 
+                 dict({'MSE_Raw': MSE_Raw,
+                      'MSE_round': MSE_round,
+                      'RMSE_Raw': RMSE_Raw,
+                      'RMSE': RMSE_round}) 
+                 }) 
+
+print(Berkeley_last12)
+Berkeley_last12df
+
+# COMMAND ----------
+
+## no features last 12
+pa_results_df = pd.DataFrame()
+pa_metrics = dict()
+
+loc_ = 'PaloAlto'
+date_col = 'datetime_pac'
+actual_col= 'Ports_Available'
+stationcol = 'Station_Location'
+
+
+stations = paloalto_feat[stationcol].unique()
+
+for station in stations:
+    stationdf = paloalto_feat[paloalto_feat[stationcol] == station]
+    
+    traindf, testdf = split2_TrainTest(stationdf, 0.7)
+    
+    predictions, predictions_round =  predict_average_n_timestamps(traindf, 12, testdf.shape[0], actual_col)
+
+    testdf.loc[:, 'Predictions'] = predictions
+    testdf.loc[:, 'Predictions_Rounded'] = predictions_round
+
+    testdf = testdf[[date_col, actual_col, 'Predictions', 'Predictions_Rounded']]
+    testdf.loc[:,'Location'] = str(loc_)
+    testdf.loc[:,'SiteName'] = str(station)
+    testdf.loc[:,'Features'] = 'No'
+    testdf.loc[:,'Model'] = 'Average: Last 12'
+
+    testdf = testdf.rename(columns={actual_col: "Actuals", date_col: 'DateTime'})
+
+
+    ## Metrics
+    MSE_Raw, RMSE_Raw = calc_rmse(testdf['Predictions'], testdf['Actuals'])
+    MSE_round, RMSE_round = calc_rmse(testdf['Predictions_Rounded'], testdf['Actuals'])
+
+    evals = dict({str(station): 
+                     dict({'MSE_Raw': MSE_Raw,
+                          'MSE_round': MSE_round,
+                          'RMSE_Raw': RMSE_Raw,
+                          'RMSE': RMSE_round}) 
+                     }) 
+
+    print(evals)
+    
+    pa_metrics.update(evals)
+    ##### append each station df to results df
+    pa_results_df = pa_results_df.append(testdf)
+
+
+print(pa_metrics)
+pa_results_df     
+    
+# #### write dataframe to s3
+write_to_s3(pa_results_df ,  "PaloAlto_BenchmarkAvgLast12")
+
+# COMMAND ----------
+
+## no features last 12
+bo_results_df = pd.DataFrame()
+bo_metrics = dict()
+
+loc_ = 'Boulder'
+date_col = 'Date Time'
+actual_col= 'Ports Available'
+stationcol = 'Station'
+
+stations = boulder_feat[stationcol].unique()
+
+
+for station in stations:
+    stationdf = boulder_feat[boulder_feat[stationcol] == station]
+    
+    traindf, testdf = split2_TrainTest(stationdf, 0.7)
+    
+    predictions, predictions_round =  predict_average_n_timestamps(traindf, 12, testdf.shape[0], actual_col)
+
+    testdf.loc[:, 'Predictions'] = predictions
+    testdf.loc[:, 'Predictions_Rounded'] = predictions_round
+
+    testdf = testdf[[date_col, actual_col, 'Predictions', 'Predictions_Rounded']]
+    testdf.loc[:,'Location'] = str(loc_)
+    testdf.loc[:,'SiteName'] = str(station)
+    testdf.loc[:,'Features'] = 'No'
+    testdf.loc[:,'Model'] = 'Average: Last 12'
+
+    testdf = testdf.rename(columns={actual_col: "Actuals", date_col: 'DateTime'})
+
+
+    ## Metrics
+    MSE_Raw, RMSE_Raw = calc_rmse(testdf['Predictions'], testdf['Actuals'])
+    MSE_round, RMSE_round = calc_rmse(testdf['Predictions_Rounded'], testdf['Actuals'])
+
+    evals = dict({str(station): 
+                     dict({'MSE_Raw': MSE_Raw,
+                          'MSE_round': MSE_round,
+                          'RMSE_Raw': RMSE_Raw,
+                          'RMSE': RMSE_round}) 
+                     }) 
+
+    print(evals)
+    
+    bo_metrics.update(evals)
+    ##### append each station df to results df
+    bo_results_df = bo_results_df.append(testdf)
+
+
+print(bo_metrics)
+bo_results_df     
+    
+# #### write dataframe to s3
+write_to_s3(bo_results_df ,  "Boulder_BenchmarkAvgLast12")
+
+# COMMAND ----------
+
+Berkeley_Last12 = {'Berkeley': {'Slrp': {'MSE_Raw': 2.350619056163646, 'MSE_round': 2.350619056163646, 'RMSE_Raw': 1.5331728722370632, 'RMSE': 1.5331728722370632}}}
+
+PaloAlto_Last12 = {'Palo Alto' : {'BRYANT': {'MSE_Raw': 9.131182168621645, 'MSE_round': 10.15718643459537, 'RMSE_Raw': 3.0217845999709585, 'RMSE': 3.1870341125559625}, 'HAMILTON': {'MSE_Raw': 1.458819307374843, 'MSE_round': 1.458819307374843, 'RMSE_Raw': 1.207815924458211, 'RMSE': 1.207815924458211}, 'CAMBRIDGE': {'MSE_Raw': 9.11735151623901, 'MSE_round': 9.11735151623901, 'RMSE_Raw': 3.0194952419633005, 'RMSE': 3.0194952419633005}, 'HIGH': {'MSE_Raw': 7.236497398169747, 'MSE_round': 7.236497398169747, 'RMSE_Raw': 2.6900738648166795, 'RMSE': 2.6900738648166795}, 'MPL': {'MSE_Raw': 0.997308451462408, 'MSE_round': 0.997308451462408, 'RMSE_Raw': 0.9986533189562873, 'RMSE': 0.9986533189562873}, 'TED_THOMPSON': {'MSE_Raw': 3.4648407753905452, 'MSE_round': 3.2971469585501527, 'RMSE_Raw': 1.8614082774583725, 'RMSE': 1.8158047688422212}, 'WEBSTER': {'MSE_Raw': 6.598725923509916, 'MSE_round': 7.090974340570608, 'RMSE_Raw': 2.5687985369642976, 'RMSE': 2.6628883454945322}, 'RINCONADA_LIB': {'MSE_Raw': 2.3671272205275433, 'MSE_round': 2.3671272205275433, 'RMSE_Raw': 1.5385471135222162, 'RMSE': 1.5385471135222162}}}
+
+Boulder_Last12 = {'Boulder' : {'1505 30th St': {'MSE_Raw': 1.5070877444823254, 'MSE_round': 1.5070877444823254, 'RMSE_Raw': 1.2276350208764515, 'RMSE': 1.2276350208764515}, '600 Baseline Rd': {'MSE_Raw': 0.1733357258209223, 'MSE_round': 0.1733357258209223, 'RMSE_Raw': 0.41633607316796645, 'RMSE': 0.41633607316796645}, '1400 Walnut St': {'MSE_Raw': 0.12076081105329266, 'MSE_round': 0.12076081105329266, 'RMSE_Raw': 0.34750656260464013, 'RMSE': 0.34750656260464013}, '1739 Broadway': {'MSE_Raw': 0.13978108738560918, 'MSE_round': 0.13978108738560918, 'RMSE_Raw': 0.37387308994578516, 'RMSE': 0.37387308994578516}, '3172 Broadway': {'MSE_Raw': 0.383870308530452, 'MSE_round': 0.5060111250672887, 'RMSE_Raw': 0.6195726822015735, 'RMSE': 0.7113445895396188}, '900 Walnut St': {'MSE_Raw': 0.4017584783778934, 'MSE_round': 0.4017584783778934, 'RMSE_Raw': 0.633844206708473, 'RMSE': 0.633844206708473}, '1770 13th St': {'MSE_Raw': 0.11232729230217119, 'MSE_round': 0.11232729230217119, 'RMSE_Raw': 0.33515264030314784, 'RMSE': 0.33515264030314784}, '3335 Airport Rd': {'MSE_Raw': 0.12757940068185897, 'MSE_round': 0.12757940068185897, 'RMSE_Raw': 0.35718258731614977, 'RMSE': 0.35718258731614977}, '1100 Walnut': {'MSE_Raw': 0.3324959626771936, 'MSE_round': 0.3324959626771936, 'RMSE_Raw': 0.5766246289200572, 'RMSE': 0.5766246289200572}, '1500 Pearl St': {'MSE_Raw': 0.7611699264310067, 'MSE_round': 0.7611699264310067, 'RMSE_Raw': 0.8724505295035396, 'RMSE': 0.8724505295035396}, '1745 14th street': {'MSE_Raw': 0.35618158980800285, 'MSE_round': 0.35618158980800285, 'RMSE_Raw': 0.59680950881165, 'RMSE': 0.59680950881165}, '5660 Sioux Dr': {'MSE_Raw': 0.1449847478916203, 'MSE_round': 0.1449847478916203, 'RMSE_Raw': 0.38076862776707365, 'RMSE': 0.38076862776707365}, '2667 Broadway': {'MSE_Raw': 0.9325318499910281, 'MSE_round': 0.9325318499910281, 'RMSE_Raw': 0.9656768869508207, 'RMSE': 0.9656768869508207}, '1360 Gillaspie Dr': {'MSE_Raw': 0.8512470841557509, 'MSE_round': 0.8512470841557509, 'RMSE_Raw': 0.922630524183842, 'RMSE': 0.922630524183842}, '5565 51st St': {'MSE_Raw': 0.019020276332316528, 'MSE_round': 0.019020276332316528, 'RMSE_Raw': 0.13791401789635646, 'RMSE': 0.13791401789635646}, '5333 Valmont Rd': {'MSE_Raw': 0.39422214247263593, 'MSE_round': 0.39422214247263593, 'RMSE_Raw': 0.6278711193172019, 'RMSE': 0.6278711193172019}, '1100 Spruce St': {'MSE_Raw': 0.48968239727256413, 'MSE_round': 0.48968239727256413, 'RMSE_Raw': 0.699773104136308, 'RMSE': 0.699773104136308}, '2052 Junction Pl': {'MSE_Raw': 0.17190023326753992, 'MSE_round': 0.17190023326753992, 'RMSE_Raw': 0.4146085301432424, 'RMSE': 0.4146085301432424}}}
+
+Last12Avg =  dictstodf(Berkeley_Last12, PaloAlto_Last12, Boulder_Last12, 'Average Last 12','No')
+Last12Avg
 
 # COMMAND ----------
 
@@ -1561,8 +2195,6 @@ arima = pd.concat([arima_nf, arima_f], ignore_index=True, sort=False)
 print(arima.shape)
 arima = arima.sort_values(by=['city', 'station'], ignore_index=True)
 arima
-
-
 
 # COMMAND ----------
 
@@ -2069,10 +2701,11 @@ n_inputs_ = 12
 n_outputs_ = 1
 loc__ = 'PaloAlto'
 
-df_ = paloalto_feat[[date_col_, stationcol_, actual_col_]]
+# df_ = paloalto_feat[[date_col_, stationcol_, actual_col_]]
 
 ## run model
-lstm1_pa_results_df, lstm1_pa_metrics = lstm_multistation(n_inputs_, n_outputs_, stationcol_, date_col_, actual_col_, loc__, df_)
+lstm1_pa_results_df, lstm1_pa_metrics = lstm_multistation(n_inputs_, n_outputs_, stationcol_, date_col_, actual_col_, loc__, 
+                                                          paloalto_feat[[date_col_, stationcol_, actual_col_]])
 
 # #### write dataframe to s3
 write_to_s3(lstm1_pa_results_df, "PaloAlto_LSTM_1StepNoFeatures")
@@ -2087,7 +2720,7 @@ n_inputs1 = 12
 n_outputs1 = 1
 loc_1 = 'PaloAlto'
 
-df = paloalto_feat
+# df = paloalto_feat
 
 ## run model
 lstm1_pa_results_df2, lstm1_pa_metrics2 = lstm_multistation(n_inputs1, n_outputs1, stationcolumn, date_column, actualcol1, loc_1, paloalto_feat, False)
@@ -2132,7 +2765,6 @@ n_outputs1 = 6
 loc_1 = 'PaloAlto'
 
 df = paloalto_feat
-
 
 ## run model
 lstm6_pa_results_df2, lstm6_pa_metrics2 = lstm_multistation(n_inputs1, n_outputs1, stationcol1, date_col1, actualcol1, loc_1, df, False)
@@ -2234,30 +2866,6 @@ write_to_s3(lstm6_bo_results_df2, "Boulder_LSTM_6StepFeatures")
 
 # COMMAND ----------
 
-def dictstodf(dict1, dict2, dict3, modeltype, features='No'):
-    emptyd = dict()
-    emptyd.update(dict1)
-    emptyd.update(dict2)
-    emptyd.update(dict3)
-    
-    
-    df = pd.DataFrame.from_dict({(i,j): emptyd[i][j] 
-                           for i in emptyd.keys() 
-                           for j in emptyd[i].keys()},
-                       orient='index')
-
-    df.reset_index(inplace=True)
-
-    df = df.rename(columns={"level_0":"city", "level_1":"station", "RMSE":"RMSE_round"})
-    df['Model'] = str(modeltype)
-    df['Features'] = str(features)
-    
-    print(df.shape)
-    return df
-
-
-# COMMAND ----------
-
 ## berkeley 1 step
 
 berkeley_lstm1_nf =  {'Berkeley': {'Slrp': {'MSE_Raw': 0.1546694032730616, 'MSE_round': 0.16481149012567325, 'RMSE_Raw': 0.39328031132140545, 'RMSE': 0.4059698143035677}}} #nof
@@ -2272,7 +2880,8 @@ berkeley_lstm6_f = {'Berkeley':{'Slrp': {'MSE_Raw': 0.39345046206407697, 'MSE_ro
 ### PA
 # 1step
 #no features
-paloalto_lstm1_nf = {'Palo Alto': {'BRYANT': {'MSE_Raw': 1.0703721246223663, 'MSE_round': 0.9777378815080789, 'RMSE_Raw': 1.0345879008679573, 'RMSE': 0.9888062911956411}, 'HAMILTON': {'MSE_Raw': 0.1771083299383337, 'MSE_round': 0.18168761220825852, 'RMSE_Raw': 0.4208424051094824, 'RMSE': 0.42624829877462095}, 'CAMBRIDGE': {'MSE_Raw': 0.4838068100898705, 'MSE_round': 0.6341113105924596, 'RMSE_Raw': 0.6955622258934642, 'RMSE': 0.7963110639646166}, 'HIGH': {'MSE_Raw': 0.2243488421206798, 'MSE_round': 0.22836624775583483, 'RMSE_Raw': 0.4736547710312647, 'RMSE': 0.4778768123228358}, 'MPL': {'MSE_Raw': 0.258998575663305, 'MSE_round': 0.5095152603231597, 'RMSE_Raw': 0.508919026627326, 'RMSE': 0.713803376514261}, 'TED_THOMPSON': {'MSE_Raw': 0.2623811546863151, 'MSE_round': 0.2894075403949731, 'RMSE_Raw': 0.5122315440172688, 'RMSE': 0.537966114541588}, 'WEBSTER': {'MSE_Raw': 0.17678392475291177, 'MSE_round': 0.18168761220825852, 'RMSE_Raw': 0.4204568048597998, 'RMSE': 0.42624829877462095}, 'RINCONADA_LIB': {'MSE_Raw': 0.1878327846841922, 'MSE_round': 0.18276481149012566, 'RMSE_Raw': 0.43339679819328636, 'RMSE': 0.4275100133214726}}}
+paloalto_lstm1_nf = {'Palo Alto': {'BRYANT': {'MSE_Raw': 0.3322590452193334, 'MSE_round': 0.36912028725314183, 'RMSE_Raw': 0.5764191575748792, 'RMSE': 0.6075527032720222}, 'HAMILTON': {'MSE_Raw': 0.17354608493419882, 'MSE_round': 0.18168761220825852, 'RMSE_Raw': 0.4165886279463217, 'RMSE': 0.42624829877462095}, 'CAMBRIDGE': {'MSE_Raw': 0.3478720015832584, 'MSE_round': 0.3497307001795332, 'RMSE_Raw': 0.5898067493537679, 'RMSE': 0.5913803346236103}, 'HIGH': {'MSE_Raw': 0.29346470986535744, 'MSE_round': 0.2883303411131059, 'RMSE_Raw': 0.5417238317310376, 'RMSE': 0.5369640035543406}, 'MPL': {'MSE_Raw': 0.1395281849355635, 'MSE_round': 0.1421903052064632, 'RMSE_Raw': 0.37353471717574455, 'RMSE': 0.37708129787416295}, 'TED_THOMPSON': {'MSE_Raw': 0.1806262709302046, 'MSE_round': 0.1741472172351885, 'RMSE_Raw': 0.42500149520937525, 'RMSE': 0.41730949813680074}, 'WEBSTER': {'MSE_Raw': 0.26999869883965183, 'MSE_round': 0.2718132854578097, 'RMSE_Raw': 0.5196139902270259, 'RMSE': 0.5213571572902876}, 'RINCONADA_LIB': {'MSE_Raw': 0.0928559029210134, 'MSE_round': 0.09443447037701976, 'RMSE_Raw': 0.3047226655846483, 'RMSE': 0.3073019205553713}}}
+
 
 #features
 paloalto_lstm1_f = {'Palo Alto': {'BRYANT': {'MSE_Raw': 0.33572485124016355, 'MSE_round': 0.37378815080789946, 'RMSE_Raw': 0.5794176828852944, 'RMSE': 0.6113821642867082}, 'HAMILTON': {'MSE_Raw': 0.17584660393163168, 'MSE_round': 0.1910233393177738, 'RMSE_Raw': 0.4193406776496071, 'RMSE': 0.4370621687103264}, 'CAMBRIDGE': {'MSE_Raw': 0.4639497948868851, 'MSE_round': 0.503411131059246, 'RMSE_Raw': 0.6811386018182239, 'RMSE': 0.7095147151816134}, 'HIGH': {'MSE_Raw': 0.2713745110366625, 'MSE_round': 0.27971274685816877, 'RMSE_Raw': 0.52093618710612, 'RMSE': 0.5288787638563008}, 'MPL': {'MSE_Raw': 0.1365850769171972, 'MSE_round': 0.14326750448833034, 'RMSE_Raw': 0.36957418323957264, 'RMSE': 0.3785069411362628}, 'TED_THOMPSON': {'MSE_Raw': 0.22421727733728677, 'MSE_round': 0.2542190305206463, 'RMSE_Raw': 0.4735158680944988, 'RMSE': 0.5042013789356851}, 'WEBSTER': {'MSE_Raw': 0.24725046312201085, 'MSE_round': 0.26463195691202873, 'RMSE_Raw': 0.4972428613082453, 'RMSE': 0.5144239077959234}, 'RINCONADA_LIB': {'MSE_Raw': 0.0997399179225467, 'MSE_round': 0.09730700179533214, 'RMSE_Raw': 0.31581627241569854, 'RMSE': 0.31194070237038984}}}
@@ -2329,10 +2938,9 @@ lstm
 # COMMAND ----------
 
 ### results dictionary metrics
-
 ## replace MSE_raw with MSE_RAW, replace RMSE_raw with RMSE_RAW
 
-BatchModels_Evals = pd.concat([arima, prophet, lstm], ignore_index=True, sort=False)
+BatchModels_Evals = pd.concat([arima, prophet, lstm, simpleavg, avgDayHour, Last12Avg], ignore_index=True, sort=False)
 BatchModels_Evals = BatchModels_Evals.sort_values(by=['city', 'station'], ignore_index=True)
 BatchModels_Evals
 
@@ -2412,7 +3020,7 @@ alt.hconcat(
     arima,
     prophet,
     lstm,
-    data=df
+    data = BatchModels_Evals
 ).resolve_scale(
     y='shared'
 )
@@ -2747,11 +3355,11 @@ summary_res.sort_values(by = ['city', 'MedianRMSE'], ascending=False).reset_inde
 
 # COMMAND ----------
 
-BatchModels_Evals
+BatchModels_Evals #[BatchModels_Evals['city'] == 'Boulder'][['city', 'RMSE_round', 'Model', 'Features']].groupby(['city', 'Model', 'Features']).mean().reset_index().sort_values('RMSE_round')
 
 # COMMAND ----------
 
-# ## general RMSEs
+## general RMSEs
 # BatchModels_Evals['PDQ_ARIMAOrder'] = BatchModels_Evals['PDQ_ARIMAOrder'].astype(str)
 # sparkBatchModel_Evals = spark.createDataFrame(BatchModels_Evals)
 
@@ -2801,50 +3409,6 @@ PaloAlto_Prophet = readsparktodf('PaloAlto_Prophet', 'Prophet', 'No')
 
 # COMMAND ----------
 
-# Berkeley_LSTM_1StepFeatures.head()
-# Berkeley_LSTM_1StepNoFeatures.head()
-# Berkeley_LSTM_6StepFeatures.head()
-# Berkeley_LSTM_6StepNoFeatures.head()
-
-# COMMAND ----------
-
-# Berkeley_LSTM_1StepFeatures.head()
-# Berkeley_LSTM_1StepNoFeatures.head()
-# Berkeley_LSTM_6StepFeatures.head()
-# Berkeley_LSTM_6StepNoFeatures.head()
-# BerkeleySlrp_ARIMA_Features.head()
-# BerkeleySlrp_ARIMA.head()
-# BerkeleySlrp_Prophet_Features.head()
-BerkeleySlrp_Prophet.head()
-
-
-# COMMAND ----------
-
-# Boulder_ARIMA_Features.head()
-# Boulder_ARIMA.head()
-# print(Boulder_LSTM_1StepFeatures.head())
-# print(Boulder_LSTM_1StepNoFeatures.head())
-# print(Boulder_LSTM_6StepFeatures.head())
-# print(Boulder_LSTM_6StepNoFeatures.head())
-# Boulder_Prophet_Features.head()
-# Boulder_Prophet.head()
-
-
-# COMMAND ----------
-
-
-
-# PaloAlto_ARIMA_features.head()
-# PaloAlto_ARIMA.head()
-# PaloAlto_LSTM_1StepFeatures.head()
-# PaloAlto_LSTM_1StepNoFeatures.head()
-# PaloAlto_LSTM_6StepFeatures.head()
-# PaloAlto_LSTM_6StepNoFeatures.head()
-# PaloAlto_Prophet_Features.head()
-# PaloAlto_Prophet.head()
-
-# COMMAND ----------
-
 ######### berkeley cleanup ########
 ## add site name for slrp
 BerkeleySlrp_ARIMA_Features.loc[:, 'SiteName'] = 'slrp'
@@ -2883,17 +3447,6 @@ berkeley= pd.concat([ BerkeleySlrp_ARIMA_Features, BerkeleySlrp_ARIMA,
 ], sort=False)
 
 berkeley
-
-# COMMAND ----------
-
-# PaloAlto_ARIMA_features.head()
-# PaloAlto_ARIMA
-# PaloAlto_LSTM_1StepFeatures
-# PaloAlto_LSTM_1StepNoFeatures
-# PaloAlto_LSTM_6StepFeatures
-# PaloAlto_LSTM_6StepNoFeatures
-# PaloAlto_Prophet_Features
-# PaloAlto_Prophet
 
 # COMMAND ----------
 
@@ -2962,8 +3515,6 @@ boulder
 # COMMAND ----------
 
 # combine all
-
-
 batchmodel_results = pd.concat([
     berkeley,
     paloalto,
@@ -2972,6 +3523,123 @@ batchmodel_results = pd.concat([
 
 batchmodel_results = batchmodel_results.rename(columns={'Predictions_(rounded)': 'Predictions_Rounded'})
 batchmodel_results = batchmodel_results.sort_values(['DateTime', 'Location', 'SiteName', 'Model', 'Features'])
+
+# COMMAND ----------
+
+## append benchmark models
+Berkeley_simpleavg = spark.read.parquet(f"/mnt/{mount_name}/data/batch/BerkeleySlrp_BenchmarkSimpleAvg").toPandas()
+PaloAlto_simpleavg = spark.read.parquet(f"/mnt/{mount_name}/data/batch/PaloAlto_BenchmarkSimpleAvg").toPandas()
+Boulder_simpleavg = spark.read.parquet(f"/mnt/{mount_name}/data/batch/Boulder_BenchmarkSimpleAvg").toPandas()
+
+PaloAlto_simpleavg = PaloAlto_simpleavg.rename(columns={"datetime_pac": "DateTime"})
+Boulder_simpleavg = Boulder_simpleavg.rename(columns={'Date_Time': "DateTime"})
+
+
+Berkeley_avgDayHour = spark.read.parquet(f"/mnt/{mount_name}/data/batch/BerkeleySlrp_BenchmarkDayHourAvg").toPandas()
+PaloAlto_avgDayHour = spark.read.parquet(f"/mnt/{mount_name}/data/batch/PaloAlto_BenchmarkDayHourAvg").toPandas()
+Boulder_avgDayHour = spark.read.parquet(f"/mnt/{mount_name}/data/batch/Boulder_BenchmarkDayHourAvg").toPandas()
+
+
+Berkeley_avglast12 = spark.read.parquet(f"/mnt/{mount_name}/data/batch/BerkeleySlrp_BenchmarkAvgLast12").toPandas()
+PaloAlto_avglast12 = spark.read.parquet(f"/mnt/{mount_name}/data/batch/PaloAlto_BenchmarkAvgLast12").toPandas()
+Boulder_avglast12 = spark.read.parquet(f"/mnt/{mount_name}/data/batch/Boulder_BenchmarkAvgLast12").toPandas()
+
+
+batchmodel_results = pd.concat([
+    batchmodel_results,
+    Berkeley_simpleavg,
+    PaloAlto_simpleavg,
+    Boulder_simpleavg,
+    Berkeley_avgDayHour,
+    PaloAlto_avgDayHour,
+    Boulder_avgDayHour,
+    Berkeley_avglast12,
+    PaloAlto_avglast12,
+    Boulder_avglast12
+], ignore_index=True, sort=False)
+
+# COMMAND ----------
+
+test = batchmodel_results[batchmodel_results['Model'] == 'LSTM 6-step'][['DateTime', 'Actuals', 'Predictions_Rounded', 'Model', 'Features', 'Location', 'StepsOut']]
+test.loc[:, 'Error'] = test['Predictions_Rounded'] - test['Actuals']
+test.loc[:, 'Error'] = test['Error'].abs()
+MAE_timestep = test[['Model',	'Features',	'Location',	'StepsOut',	'Error']].groupby(['Model', 'Features', 'Location', 'StepsOut']).mean()
+MAE_timestep = MAE_timestep.reset_index()
+MAE_timestep
+
+# COMMAND ----------
+
+Berk_MAE = alt.Chart(MAE_timestep).mark_bar(filled = True).encode(
+    x=alt.X('StepsOut:O', 
+            axis=alt.Axis(title='LSTM Steps out Predicted', titleFontSize=14, labelFontSize=12, grid=False)),
+    y=alt.Y('Error', 
+            axis=alt.Axis(title = ['MAE'],titleFontSize=14,labelFontSize=12, grid=False)),
+    column = 'Features:N',
+    color = alt.Color('Features:N', 
+                      legend = alt.Legend(
+                          title = 'Features'), 
+                      scale=alt.Scale(scheme='tableau10')),
+    tooltip = [ 'Model:N', 'Location:N', 'Features:N','StepsOut', 'Error', ]
+).properties(
+    title=['Berkeley: SlrpEV', 
+           'Mean Absolute Error for LSTM per Step out'],
+    width=200,
+    height=300
+).transform_filter(
+    (datum.Location == 'Berkeley')
+)
+
+
+PA_MAE = alt.Chart(MAE_timestep).mark_bar(filled = True).encode(
+    x=alt.X('StepsOut:O', 
+            axis=alt.Axis(title='LSTM Steps out Predicted', titleFontSize=14, labelFontSize=12, grid=False)),
+    y=alt.Y('Error', 
+            axis=alt.Axis(title = ['MAE'],titleFontSize=14,labelFontSize=12, grid=False)),
+    column = 'Features:N',
+    color = alt.Color('Features:N', 
+                      legend = alt.Legend(
+                          title = 'Features'), 
+                      scale=alt.Scale(scheme='tableau10')),
+    tooltip = [ 'Model:N', 'Location:N', 'Features:N','StepsOut', 'Error', ]
+).properties(
+    title=['Palo Alto', 
+           'Mean Absolute Error for LSTM per Step out'],
+    width=200,
+    height=300
+).transform_filter(
+    (datum.Location == 'PaloAlto')
+)
+
+Bo_MAE = alt.Chart(MAE_timestep).mark_bar(filled = True).encode(
+    x=alt.X('StepsOut:O', 
+            axis=alt.Axis(title='LSTM Steps out Predicted', titleFontSize=14, labelFontSize=12, grid=False)),
+    y=alt.Y('Error', 
+            axis=alt.Axis(title = ['MAE'],titleFontSize=14,labelFontSize=12, grid=False)),
+    column = 'Features:N',
+    color = alt.Color('Features:N', 
+                      legend = alt.Legend(
+                          title = 'Features'), 
+                      scale=alt.Scale(scheme='tableau10')),
+    tooltip = [ 'Model:N', 'Location:N', 'Features:N','StepsOut', 'Error', ]
+).properties(
+    title=['Boulder', 
+           'Mean Absolute Error for LSTM per Step out'],
+    width=200,
+    height=300
+).transform_filter(
+    (datum.Location == 'Boulder')
+)
+
+
+alt.hconcat(
+    Berk_MAE,
+    PA_MAE,
+    Bo_MAE,
+    data=MAE_timestep
+).resolve_scale(
+    y='shared'
+).configure_title(anchor='middle')
+
 
 # COMMAND ----------
 
@@ -2992,8 +3660,6 @@ batchmodel_results
 # write to table
 # ## general RMSEs
 # BatchModels_Evals['PDQ_ARIMAOrder'] = BatchModels_Evals['PDQ_ARIMAOrder'].astype(str)
-
-
 
 sparkBatchModel_Res = spark.createDataFrame(batchmodel_results)
 sparkBatchModel_Res.write.mode("overwrite").saveAsTable('BatchModel_Results')

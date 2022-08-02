@@ -282,6 +282,10 @@ print(slrp_rmse_2a)
 
 # COMMAND ----------
 
+slrp_preds_2a
+
+# COMMAND ----------
+
 # plt.subplots(figsize = (10,5))
 # plt.plot(slrp_test['datetime'], slrp_test['ports_available'], label = 'actual');
 # plt.plot(slrp_test['datetime'], slrp_preds_2a, label = 'predictions');

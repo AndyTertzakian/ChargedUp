@@ -157,31 +157,44 @@
         <div class="row content" data-aos="fade-up">
           <div class="col-lg-6">
             <p>
-              Since 2016, transportation has been the largest source of greenhouse gas emissions in the US.
-              In 2020, 27% of greenhouse gas emissions in the US come from transportation, and 57% of these emissions are from light-duty vehicles 
+              Since 2016, transportation has been the largest source of greenhouse gas emissions in the U.S.
+              In 2020, 27% of greenhouse gas emissions in the U.S. came from transportation, and 57% of these emissions were from light-duty vehicles 
               <a href="https://www.epa.gov/ghgemissions/inventory-us-greenhouse-gas-emissions-and-sinks">(US EPA)</a>.
             </p>
             <p>
               The federal government has ambitious goals to reduce these emissions by encouraging the adoption of electric vehicles (EV) and installation of EV charging stations
               <a href="https://www.whitehouse.gov/briefing-room/statements-releases/2021/12/13/fact-sheet-the-biden-harris-electric-vehicle-charging-action-plan/">(Biden-Harris EV Charging Action Plan)</a>:
             <ul>
-              <li><i class="ri-check-double-line"></i> 50% EV sales share in the US by 2030</li>
+              <li><i class="ri-check-double-line"></i> 50% EV sales share in the U.S. by 2030</li>
               <li><i class="ri-check-double-line"></i> Build a more convenient and equitable charging network by installing 500,000 new EV charging stations using $7.5B in federal funds</li>
             </ul>  
+            </p>
+            <p>
+              More recently announced, the Inflation Reduction Act of 2022, which is currently under federal consideration as of August 1, 2022, would eliminate the 200,000-vehicle cap per manufacturer for the federal EV tax credit, and rather than applying this $7,500 credit on EV buyers' taxes, they would be able to claim these funds upfront as a price reduction.
+              Additionally, the Act introduces a new $4,000 incentive for used EVs (<a href="https://cleantechnica.com/2022/07/29/what-the-inflation-reduction-act-means-to-electric-car-truck-buyers/">Clean Technica</a>).
+              Both of these provisions will encourage EV adoption by making EVs more economically accessible to middle- and low-income Americans.
             </p>
             <img src="assets/img/US_GHGs.png" width="80%" style="padding: 15px">
           </div>
           <div class="col-lg-6 pt-4 pt-lg-0">
             <p>
-              Exponential growth in EVs will put more pressure on public EV charging station availability, especially as EV adoption becomes more economical and equitable.
-              Concern about charging infrastructure is a commonly cited factor inhibiting EV adoption, particularly for lower income households or individuals living in multi-unit dwellings
+              Exponential growth in EVs, accelerated by federal and local incentives, will put more pressure on public EV charging station availability, especially as EV adoption becomes more economical and equitable.
+              Concern about charging infrastructure is a commonly cited factor inhibiting EV adoption, particularly for lower income households or individuals living in multi-unit dwellings, whom may rely more heavily on public charging.
               (<a href = "https://theharrispoll.com/briefs/recharging-the-electric-vehicle-market-june-2021/">The Harris Poll</a>, 
               <a href = "https://pluginamerica.org/wp-content/uploads/2022/03/2022-PIA-Survey-Report.pdf">Plug In America</a>, 
               <a href = "https://www.autolist.com/news-and-analysis/2022-survey-electric-vehicles">Autolist</a>).
             </p>
-            <p style="color:#7bd159">
-              Our goal is to provide electric vehicle drivers with availability forecasts of charging stations so they know the best times and locations for charging.
-              With more informed drivers, public EV charging stations can be better utilized to ensure that everyone can stay charged up!
+            <p>
+              <!--Our goal is to provide electric vehicle drivers with availability forecasts of charging stations so they know the best times and locations for charging.
+              -->
+              Our solution to this problem is to provide insights on charging station availability, giving EV drivers the best times to charge and giving potential EV adopters reassurance that public charging stations are accessible.<br>
+            </p>
+            <p>
+              In this project, we mimicked streaming data to simulate real-time information coming from active EV charging stations. We successfully implemented long short-term memory neural network models across multiple cities, with over 27 
+			        charging stations and developed interactive tools to view the results.<br> 
+			      </p>
+			      <p style="color:#7bd159">
+			        With more informed drivers, public EV charging stations can be better utilized to ensure that everyone can stay charged up!
             </p>
             <!-- <a href="#" class="btn-learn-more">Learn More</a> -->
             <img src="assets/img/EV_growth.png" width="80%" style="padding: 15px">
@@ -208,7 +221,7 @@
             <h4>Soldan, Bionda, Mauri, & Celaschi (2021)</h4>
             <p>
               Soldan et. al combined historical and streaming data to predict EV charging station demand for a single station in Italy.
-              The focus of this paper was on the architecture for combining historical and streaming data, rather than focusing on the model results.
+              The focus of this paper was on the architecture for combining historical and streaming data, rather than focusing on accurate model results.
               The researchers implemented a streaming logistic regression model by simulating streaming data from historically collected information, 
               which was then passed through a Kafka topic to a consumer. Once the model was updated and predictions were made, the results were stored in an influxdb database.
               Soldan et. al found that implementing this streaming architecture greatly improved model results and concluded that the integration of streaming data,
@@ -216,7 +229,7 @@
             </p>
             <p>
               The ChargedUp team had the opportunity to speak with Francesca Soldan and ask questions about their motivations and data pipeline.
-              We drew much of the inspiration for our streaming setup from this paper.
+              We drew much of the inspiration for our streaming setup from this paper and our call with Francesca.
             </p>
             <a href="https://arxiv.org/pdf/2104.12503.pdf" class="btn-learn-more">Read this Paper</a>
           </div>
@@ -228,11 +241,12 @@
               This subhourly approach aligned well with our goal to provide granular forecasts to EV drivers.
             </p>
             <p>
-              They forecasted charging availability using hybrid LSTM Neural Networks, which combines long short-term memory neural networks with forward neural networks.
+              They forecasted charging availability using hybrid LSTM Neural Networks, which combine long short-term memory neural networks with forward neural networks.
               Though the ChargedUp LSTM models are not quite as complex as these, we based several modeling decisions off of this paper, including number of inputs and outputs from the LSTM.
             </p>
             <p>
-              Ma and Faye conclude that the predictions from their hybrid models are most accurate for the first hour (out of 6 hours forecasted).
+              Ma and Faye conclude that the predictions from their hybrid models are most accurate for the first hour (out of 6 hours forecasted). They included traffic data which provided for 
+			  the best model results due to this local environment information. Unfortunately, we were unable to implement traffic data in our project but believe this may be a good next step.
               The code from their project is accessible via GitHub, and the link is included below.
             </p>
             <a href="https://arxiv.org/pdf/2106.04986.pdf" class="btn-learn-more">Read this Paper</a>
@@ -292,10 +306,10 @@
               <div>
                 <h3>Data Collected & Used</h3>
                 <p>
-                  We collected data from publicly available charging stations in the US. 
+                  We collected data from publicly available charging stations in the U.S.
                   The City of Palo Alto in California and the City of Boulder in Colorado both have data available for download on their respective websites. 
                   We additionally have partnered with the Energy, Controls, and Applications Lab (eCAL) at UC Berkeley on their Smart Learning Pilot For Electric Vehicle Charging Stations (SlrpEV) project. 
-                  eCAL’s SlrpEV project is focused around developing the next-generation of EV charging stations that intelligently manages electric power and parking through machine learning. 
+                  eCAL’s SlrpEV project is focused around developing the next-generation of EV charging stations that intelligently manage electric power and parking through machine learning. 
                   For each of these locations, we predict charging station port availability at the 10-minute level, and additionally for SlrpEV, we predict power consumption at the 10-minute level. 
                   The data sources and links are summarized below.
                 </p>
@@ -349,12 +363,12 @@
                 <p>
                   We recognize that our data is limited in scope, both in time and space. 
                   <ol>
-                    <li> Some charging sessions are not as current</li>
-                    <li> Publicly accessible data in this field is limited</li>
+                    <li> Some charging sessions are not as current: Palo Alto only has data through 2020</li>
+                    <li> Publicly accessible data in this field is limited to only a few locations and is not a representative sample of all charging stations in the U.S.</li>
                   </ol>
                   Our data is further limited in that we cannot see when stations are broken or unavailable due to maintenance.
                   It is also possible that non-EVs park in the EV parking spots, thus effectively making a charging station unavailable. We do not have visibility into this information. 
-                  Finally, because the station information is limited, any modeling cannot be generalizable to any any area or charging station, but is limited to the regions selected.
+                  Finally, because the station information is limited, any modeling cannot be generalizable to any area or charging station, but is limited to the regions selected.
                 </p>
               </div>
               <!--<div class="col-lg-6 order-1 order-lg-2 text-center">
@@ -368,26 +382,24 @@
                 <h3>Palo Alto</h3>
 				<h5> <p class="fst-italic">5% of the time, Palo Alto charging station locations are fully occupied.</p></h5>
                 <p>
-                  Interestingly, in 2014 Palo Alto passed a local law requiring all new apartment complexes, hotels, and commercial building to be include EV charging, 
+                  In 2014 Palo Alto passed a local law requiring all new apartment complexes, hotels, and commercial buildings to include EV charging, 
                   or include the electrical requirements to install charging capabilities later <a href="https://www.paloaltoonline.com/news/2014/07/03/palo-alto-speeds-ahead-with-new-electric-vehicle-requirements">(Palo Alto Online)</a>.
-				          This has allowed for an increase in charging capacity for EV owners, greatly benefitting the 1 in 6 drivers Palo alto 1 in 6 who own an electric vehicle
-				  <a href="https://www.cityofpaloalto.org/Departments/Utilities/Sustainability/Electric-Vehicle#:~:text=The%20City%20of%20Palo%20Alto%20is%20participating%20in%20a%20CALeVIP,learn%20more%20about%20the%20program">(City of Palo Alto)</a>. 
-				  <br><br>From our dataset of charging stations i Palo Alto we saw that about 5% of the time there were charging station locations with fully occupied ports. Of the charging station locations, MPL (Mitchell Park Library) had the highest full occupancy rate at 15%,
-				  followed by the Rinconada Library with 11%. The number of fully occupied charging stations decreased starting in 2016. Looking at the fully occupied charging station locations in the second chart, 
-				  new charging locations and charging ports were added in 2017, 2018 and even more in 2020. The data we have from Palo Alto does not include charging station ports that were added in 2020. 2020 was an odd year 
-				  as well due to the COVID-19 pandemic which also caused a lower need to travel, and thus less usage of charging ports. 
-				  <br><br>
-				  Full occupancy of the charging ports across locations occurred most frequently during the hours of 3 PM to about 5 AM. At about 6 PM there were over 10,000 records of full occupancy. 
-				  There was not a large difference in full occupancy by hour between holiday days vs non-holiday days nor between weekdays or weekends. The usage of the Palo Alto charging locations, 
-				  charging ports, is consistent with usage of at least one port or more. 
+				          This has allowed for an increase in charging capacity for EV owners, greatly benefitting the 1 in 6 drivers in Palo Alto whom own an electric vehicle
+				          <a href="https://www.cityofpaloalto.org/Departments/Utilities/Sustainability/Electric-Vehicle#:~:text=The%20City%20of%20Palo%20Alto%20is%20participating%20in%20a%20CALeVIP,learn%20more%20about%20the%20program">(City of Palo Alto)</a>. 
+				          <br><br>
+                  From our dataset of charging sessions in Palo Alto, we saw about 5% of the time there were charging station locations with fully occupied ports. Of the charging station locations, MPL (Mitchell Park Library) had the highest full occupancy rate at 15%,
+				          followed by the Rinconada Library with 11%. The number of fully occupied charging stations decreased starting in 2016. Looking at the fully occupied charging station locations in the second chart, 
+				          new charging locations and charging ports were added in 2017, 2018 and even more in 2020. The data we have from Palo Alto does not include charging station ports that were added in 2020. 2020 was an odd year 
+				          as well due to the COVID-19 pandemic which also caused a lower need to travel, and thus less utilization of EV charging ports. 
+				          <br><br>
+				          Full occupancy of the charging ports across all Palo Alto locations occurred most frequently during the hours of 3 PM to about 5 AM. At about 6 PM there were over 10,000 records of full occupancy. 
+				          There was not a large difference in full occupancy by hour between holiday days vs non-holiday days nor between weekdays or weekends. The utilization of charging stations by hour is consistent for 
+				          fully occupied periods and periods where one or more charging port was in use. 
                 </p>
-                <p class="fst-italic">
-                   
-				</p>
                 <ul>
-                  <li><i class="ri-check-double-line"></i> The charging stations with the highest rate of fully occupied ports are the Mitchell Park Library and Rinconada Library.</li>
-                  <li><i class="ri-check-double-line"></i> Ports are used the most during late afternoon and overnight from 3 PM to 4 AM.</li>
-                  <li><i class="ri-check-double-line"></i> Usage during the weekend and holidays, follows a similar usage pattern as weekdays and non-holiday days.</li>
+                  <li><i class="ri-check-double-line"></i> The charging station locations with the highest rate of fully occupied ports are the Mitchell Park Library (MPL) and Rinconada Library.</li>
+                  <li><i class="ri-check-double-line"></i> Charging ports are used the most during late afternoons and overnight, from 3 PM to 4 AM.</li>
+                  <li><i class="ri-check-double-line"></i> Charging during the weekend and holidays, follows a similar usage pattern as weekdays and non-holiday days.</li>
                 </ul>
 					<p class="fst-italic">
 					  4.83% of the Palo Alto records are fully occupied. By charging station location, this varies more greatly.
@@ -457,25 +469,25 @@
                 <h3>Berkeley </h3>
 				<h5> <p class="fst-italic"> Charging Ports are Utilized the Least During School Breaks, Holidays and Weekends</p></h5>
                 <p>
-                  At the Berkeley charging station location, the usage of the ports is the highest during non-school closure days. 
+                  At the Berkeley charging station location, the charging ports are used the most during non-school-closure days. 
 				  During holidays, the average ports in use is less than 1. During school breaks, such as Summer, Spring and Winter Breaks, 
-				  the charging ports are used more frequently than during holidays but, less than non-school closure days. 
-				  We observe that ports are occupied the more during weekdays compared to the weekends (Saturdays and Sundays). 
-				  The charging stations are used the most during the evening times at 7 PM. 
+				  the charging ports are used more frequently than during holidays but, less than non-school-closure days. 
+				  We observe that ports are occupied the most during weekdays, compared to the weekends (Saturdays and Sundays). 
+				  The charging stations are used the most during the evening times around 7 PM. 
 				  Between 3 AM to noon, the port occupancy on average is the same regardless if there is a school closure or not, and regardless of weekend status. 
 				  
 				  The power consumption, measured in watts, follows a similar trend as the average number of ports occupied. 
 				  Power is not consumed on average between 3am and noon but is consumed the most around 6 or 7 PM.
 				</p>
                 <ul>
-                  <li><i class="ri-check-double-line"></i> During Holidays, charging ports are not used frequently.</li>
-                  <li><i class="ri-check-double-line"></i> During Academic Breaks, charging ports are used more than holidays but less than usual.</li>
+                  <li><i class="ri-check-double-line"></i> During holidays, charging ports are not used frequently.</li>
+                  <li><i class="ri-check-double-line"></i> During academic breaks, charging ports are used more than holidays but less than usual.</li>
                   <li><i class="ri-check-double-line"></i> Utilization is the highest during non-holiday and non-academic break time periods.</li>
-				  <li><i class="ri-check-double-line"></i> Charging ports on average are occupied more frequently during the week days, Monday through Friday, compared to weekends.</li>
+				  <li><i class="ri-check-double-line"></i> Charging ports on average are occupied more frequently during the weekdays, Monday through Friday, compared to the weekends.</li>
 				  <li><i class="ri-check-double-line"></i> Charging ports are used the least between 3 AM and noon. Ports are used the most around 6 or 7 PM</li>
                 </ul>
                 <p class="fst-italic">
-                  <small>The band around each line in the charts corresponds to a 95% confidence interval.</small>
+                  <small>The band around each line in the charts corresponds to the standard deviation.</small>
                 </p>
               </div>
               <div class="col-lg-6 order-1 order-lg-2 text-center">
@@ -498,7 +510,7 @@
 				  the fully occupied rate to decrease. 
 				  <br><br>
 				  In contrast to the stations in Palo Alto and Berkeley, ports used in Boulder tend to fall in the middle of the day more frequently than in the evening or overnight. 
-				  When station locations were fully occupied, it occurred during the hours of 9am and 7pm, 9th hour to the 19th hour. The weekend and holidays also follow a similar pattern to charging port usage, as 
+				  Full occupancy at stations occurred during the hours of 9 am and 7 pm. The weekend and holidays also follow a similar pattern to charging port usage, as 
 				  weekdays and non-holiday days. 
 
                 </p>
@@ -508,8 +520,8 @@
                 <ul>
                   <li><i class="ri-check-double-line"></i> The charging stations with the highest rate of fully occupied ports are located at 1739 Broadway, 1745 14th Street and 3172 Broadway.</li>
                   <li><i class="ri-check-double-line"></i> The number of times charging stations are fully occupied has been steady to decreasing between 2018 to 2022.</li>
-                  <li><i class="ri-check-double-line"></i> Charging ports are in used the most between 9 AM and 7 PM. </li>
-				  <li><i class="ri-check-double-line"></i> Usage during the weekend and holidays follows a similar usage pattern as weekdays and non-holiday days.</li>
+                  <li><i class="ri-check-double-line"></i> Charging ports are used the most between 9 AM and 7 PM. </li>
+				  <li><i class="ri-check-double-line"></i> Hourly usage during the weekend and holidays follows a similar pattern as weekdays and non-holiday days.</li>
                 </ul>
 				<p class="fst-italic">
 					9.81% of Boulder records are fully occupied. The percentage of timestamps thats are fully occupied varies by charging station location.
@@ -650,19 +662,19 @@
                 <p>
 					During data cleaning we identified charging sessions that need to be removed or corrected.
 					EV charging sessions with total durations over 1440 minutes, more than 24 hours, were considered outliers. Through confirmation with the data sources, 
-					we determined these are likely abnormal and can be removed. In Palo Alto, most station locations have a 3 hour parking limit, and there was an overstay fee if the car remained plugged in after 
-					charging was completed. The Palo Alto data set included 22 charging sessions greater than 1 day, and Boulder included 478. Berkeley did not have charging sessions greater than one day.
+					we determined these are likely abnormal and could be removed. In Palo Alto, most station locations have a 3-hour parking limit, and there was an overstay fee if the car remained plugged in after 
+					charging was completed. The Palo Alto data set included 22 charging sessions greater than 1 day, and Boulder data set included 478. Berkeley did not have charging sessions greater than one day.
 					<br>
           <br>
 					For the Palo Alto dataset, some of the charging sessions had inconsistent timezones. Some included a start and/or end time in the UTC timezone, while others were in local time, PDT or PST. These were converted 
 					all to local time. Furthermore, for 45 records, total durations at the charging stations were less than the total charging time, so we swapped these values. 
-          The total duration is the length of time a car is at the charging port, while the charging time is the length of time a car is actively being charged. Thus the total duration must be greater 
-					than the charging time.
+					The total duration is the length of time a car is plugged in at the charging port, while the charging time is the length of time a car is actively being charged. Thus the total duration must be greater 
+					than or equal to the charging time.
 					<br>
 					<br>
-					After cleanup, we then converted the charging sessions into a time series dataset with a 10-minute interval. There were some charging sessions with a start and end time greater than the total 
+					After cleanup, we then converted the charging sessions into a time series dataset with data at 10-minute intervals. There were some charging sessions with a start and end time greater than the total 
 					duration. This was likely an error, so we decided to use start time and total duration to calculate time series intervals. 
-          Since some stations came online in the time period covered by the datasets, these stations will not appear until later in the time series.
+					Since some stations were installed in the middle or later than the starting period covered by the datasets, these stations will not appear until later in the time series.
 					<br>
           <br>
 					To transform port occupancy into a time series, we identified if there was an active charging session for a given time period and marked our "ports occupied" value with a 1. We then grouped charging ports at the same charging station location and 
@@ -725,7 +737,7 @@
           <div class="col-lg-6">
             <p>
               Our pipeline takes data from our three target areas, simulates streaming data from the historical datasets, and generates
-              pseudo-realtime predictions. Ultimately, all the predictions for our tracked stations are displayed interactively (here!) on our website.
+              pseudo-realtime predictions. Ultimately, all the predictions for our tracked stations are displayed interactively (<a href="#map">here!</a>) on our website.
             </p>
             <p>
               Here are the steps our Data Pipeline follows:
@@ -736,10 +748,10 @@
               </li>
               <li>
                 <b>Clean and standardize</b> the different datasets such that the data for the three locations are all in the same format. This includes 
-                transforming the charging session into *10-minute snapshots* of station availability. 
+                transforming the charging session data into a time series at 10-minute intervals of station availability, as described in the "Data Cleaning & Processing" section above. 
               </li>
               <li>
-                <b>Simulate streaming</b> using the 10-minute snapshots generated previously. As these datapoints begin to flow in, the history of datapoints begins to accumulate.
+                <b>Simulate streaming</b> using the time series data generated previously. As these datapoints (at 10-minute increments) begin to flow in, the history of datapoints begins to accumulate.
                 Every hour worth of datapoints for a given station, a new prediction profile for the <b>next 6 hours</b> is generated. Similarly, an entirely new model is trained on the past 90 days 
                 of data every 15th of the month.
               </li>
@@ -748,21 +760,26 @@
               </li>
               <li>
                 <b>Visualize & present results</b> by loading the predictions from S3 into different visualization tools using <b>AWS Athena</b>. Our visualization tools of choice include Tableau, Python 
-                libraries such as Folium and Plotly, and others. Finally, we embed these results for the end-user into our website for consumption (the one you are on now!).
+                libraries such as Folium and Plotly, and others. Finally, we embed these results into our website (the one you are on now!) for consumption by our end-users. Notably, we have an interactive 
+                map where users can geographically locate their desired station and see a popup graph of station availability forecasted 6 hours into the future.
               </li>
             </ol>  
             </p>
           </div>
           <div class="col-lg-6 pt-4 pt-lg-0">
-            <p><p>
-              We utilized Kafka not out of necessity, but since we built this 
+            <p>
+              We utilized Kafka since we built this 
               project with future deployment in mind. In particular, the ability
               to scale this project to many sensors feeding realtime data to our
-              system was our ultimate goal. 
+              system was our ultimate goal. That is, we designed our data pipeline such that
+              real-world IoT sensors placed on charging stations could feed directly into our Kafka 
+              setup. After that point, the streaming messages (sent every 10 minutes) would be processed in much the same 
+              way as our simulated streaming data. 
             </p>
             <p>
-              To simulate three months of 10-minute streaming data across our 34 stations took roughly <b>6 days of processing time</b>. This is something that could be improved in the future to allow
-              for additional stations and predictions to be added without the need for additional processing power. 
+              To simulate three months of 10-minute streaming data across our 27 stations took roughly <b>7 daysof processing time</b>.
+              While this may seem like a long time to process our data, in practice once we have an initial fitted model for a station, we would only process one datapoint every 10 minutes with the current station availability.
+              In reality, as long as our processing time (saving the new datapoint, making new predictions, or fitting a new model) is less than 10 minutes for each given station, then this process will function without error.
             </p>
           </div>
         </div>
@@ -821,7 +838,7 @@
       <div class="container">
         <div class="section-title" data-aos="zoom-out">
           <h2>Modeling</h2>
-          <p>Forecasting Models & Results</p>
+          <p>Forecasting Models</p>
         </div>
         <!-- TO CHANGE THE NUMBER OF TABS -- TOGGLE BETWEEN col-3, col-2, etc.-->
         <ul class="nav nav-tabs row d-flex">
@@ -839,7 +856,7 @@
           </li>
           <li class="nav-item col-2" data-aos="zoom-in" data-aos-delay="100">
             <a class="nav-link" data-bs-toggle="tab" href="#model-tab-3">
-              <i class="ri-flow-chart"></i>
+              <i class="ri-base-station-line"></i>
               <h4 class="d-none d-lg-block">Streaming Framework</h4>
             </a>
           </li>
@@ -874,15 +891,17 @@
                   We considered several different time series models of varying complexity with the goal to increase the accuracy of our predictions with each iteration. 
                   We developed one model for each charging station location in our datasets. 
                   As mentioned in the Data Pipeline Section, since we included three months of training data in our models (and since some stations came online/went offline at different times), 
-				          we ended up making 27 models (18 for Boulder, 8 for Palo Alto, and 1 for SlrpEV in Berkeley). 
+				    we ended up making 27 models (18 for Boulder, 8 for Palo Alto, and 1 for SlrpEV in Berkeley). 
                   We recognize that this approach may not be scalable as more stations are integrated into the data pipeline. At that point, we would further consider the spatial relationships among chargers to 
-				          consolidate groups of locations into just a few models.
+				    consolidate groups of locations into just a few models.
                 </p>
                 <p>
                   Within our current limitations, here is a list of the time series models we considered:
                 </p>
                 <ul>
-                  <li><i class="ri-check-double-line"></i> Benchmark Model: Predict the Average Availability (with and without streaming data)</li>
+                  <li><i class="ri-check-double-line"></i> Benchmark Model 1: Predict the Average Availability (with and without streaming data)</li>
+				  <li><i class="ri-check-double-line"></i> Benchmark Model 2: Predict the Average Availability by Day of Week and Hour</li>
+				  <li><i class="ri-check-double-line"></i> Benchmark Model 3: Predict the Average Availability by the last 12 time steps in the training dataset (with and without streaming data)</li>
                   <li><i class="ri-check-double-line"></i> Autoregressive Integrated Moving Average (ARIMA) Models</li>
                   <li><i class="ri-check-double-line"></i> Prophet from Facebook</li>
                   <li><i class="ri-check-double-line"></i> Long Short-Term Memory Neural Networks</li>
@@ -891,16 +910,17 @@
                   Feature Engineering
                 </h3>
                 <p>
-                  The primary feature in our models was the availability of charging ports at a particular charging station. As previously mentioned, this data is available at the 10-minute level.
-                  In our EDA process, we discovered that there are several time-based relationships that exist in our data, which could be beneficial to have as features in our time series models, such as an indicator 
+                  The primary feature in our models was the availability of charging ports at a particular charging station. For SlrpEV, we additionally modeled power consumption in watts at the location.
+                  As previously mentioned, this data is available at the 10-minute level.
+                  In our EDA process, we discovered there are several time-based relationships that exist in our data, which could be beneficial to have as features in our time series models, such as an indicator 
 				          variable for weekends.
                   Below is a list of the different features we engineered and integrated into our time series models. We developed models both with and without these additional features to see if they created 
 				          substantial improvements.
                   <ul>
-                    <li><i class="ri-check-double-line"></i> For all datasets: Time-based feature engineering (hour of day, day of week, weekend binary variable). Hour of day and day of week were transformed using 
+                    <li><i class="ri-check-double-line"></i> For all datasets: Time-based feature engineering (hour of day, day of week, month, weekend binary variable). Hour of day, month, and day of week were transformed using 
 					          sine and cosine functions to account for the cyclical nature of these features.</li>
-                    <li><i class="ri-check-double-line"></i> For Boulder: Inclusion of traffic counts from Longmont, CO (traffic in Longmont was used as a proxy for Boulder traffic)</li>
-                    <li><i class="ri-check-double-line"></i> For SlrpEV: Inclusion of UC Berkeley's Academic Calendar</li>
+                    <!--<li><i class="ri-check-double-line"></i> For Boulder: Inclusion of traffic counts from Longmont, CO (traffic in Longmont was used as a proxy for Boulder traffic)</li>-->
+                    <li><i class="ri-check-double-line"></i> For SlrpEV: Inclusion of UC Berkeley's Academic Calendar to identify school breaks and academic holidays.</li>
                   </ul>
                 </p>
                 <p></p>
@@ -913,7 +933,9 @@
                 <div>
                   <h3>Batch Model Framework</h3>
                   <p>
-                  For the batch models, the modeling framework started with first reading in our data from our S3 bucket. Then we filtered the datasets for each city to a few months. 
+                  For the batch models, the modeling framework started with first reading in our data from our S3 bucket. Next, we added the features discussed in the Models Overview section.
+				  Then, prior to modeling, we filtered the datasets for each city for 129 days. For Palo Alto, we chose to use 129 days starting at the beginning of 2019 because the most recent data, from 2020, 
+				  likely had impact from COVID-19. 129 days was selected so that when we performed a train-test split of our data, we had 3 months to use as training data.
                   <br><br>
                   The ARIMA and Prophet models utilized a train and test set with a 70%/30% split. The auto_arima function was utilized to gather our parameters, p, q, and d for our ARIMA models, which are described below.
                   </p>
@@ -925,13 +947,13 @@
                     <dfn>q</dfn> - order of moving average (MA) in ARIMA. It is the number of forecast errors in the model, or the size of the moving average window.
                     <br>
                     <dfn>d</dfn> - order of differencing (I) in ARIMA. This is the degree of differencing in the model. 
-                    D is the number of times lagged indicators have been subtracted to 
-                    make the data stationary.
+                    D is the number of times lagged indicators have been subtracted to make the data stationary. This is set to 0 in our models.
                   </p>
                   <p>
-                    For the LSTM models we added features to the Berkeley dataset.
-                    Then we converted our data set to 2 arrays, X and y. X was a 3-dimensional array with dimensions of n_datasets, n_inputs of steps in, and n_features. y was a 2-dimensional array (n_datasets, n_steps_out). 
-                    LSTM requires a validation set to be passed into the model function, so we did a 3-way split, 70% for train, 15% for validation and 15% for test. We chose the previous 6-lags as the inputs, 
+                    For the LSTM models we converted our data set to 2-arrays, X and y. X was a 3-dimensional array: the first dimension was the size of datasets, the second is the number of inputs or steps in, and 
+					the third is the number of features. y was a 2-dimensional array: the first dimension was the size of dataset, and the second dimension was the number of steps predicted out. 
+                    LSTM requires a validation set to be passed into the model function, so we did a 3-way split, 70% for train, 15% for validation and 15% for test. 
+                    We chose the previous 12-lags as the inputs (a strategy also done by Ma et. al (2021)), 
                     and predicted 1 and 6 steps out, 10 minutes and then 6 ten-minute intervals, or 1 hour.
                     <br><br>
                     The evaluation metric we chose was the Root Mean Squared Error (RMSE).<br>
@@ -976,294 +998,305 @@
               <h4 class="d-none d-lg-block">Results Overview</h4>
             </a>
           </li>
-		      <li class="nav-item col-2" data-aos="zoom-in" data-aos-delay="100">
+		  <li class="nav-item col-2" data-aos="zoom-in" data-aos-delay="100">
             <a class="nav-link" data-bs-toggle="tab" href="#results-tab-2">
-              <i class="ri-flow-chart"></i>
-              <h4 class="d-none d-lg-block">Results Dashboard</h4>
-            </a>
-          </li>
-          <li class="nav-item col-2" data-aos="zoom-in" data-aos-delay="100">
-            <a class="nav-link" data-bs-toggle="tab" href="#results-tab-3">
               <i class="ri-line-chart-line"></i>
-              <h4 class="d-none d-lg-block">Palo Alto</h4>
+              <h4 class="d-none d-lg-block">Batch Results</h4>
             </a>
 			    </li>
+			<li class="nav-item col-2" data-aos="zoom-in" data-aos-delay="100">
+            <a class="nav-link" data-bs-toggle="tab" href="#results-tab-3">
+              <i class="ri-flow-chart"></i>
+              <h4 class="d-none d-lg-block">Streaming Results</h4>
+            </a>
+          </li>
 		      <li class="nav-item col-2" data-aos="zoom-in" data-aos-delay="100">
             <a class="nav-link" data-bs-toggle="tab" href="#results-tab-4">
 			      <i class="ri-clipboard-line"></i>
-              <h4 class="d-none d-lg-block">Berkeley</h4>
+              <h4 class="d-none d-lg-block">Power Results</h4>
             </a>
 			    </li>
+		  <!--
           <li class="nav-item col-2" data-aos="zoom-in" data-aos-delay="100">
             <a class="nav-link" data-bs-toggle="tab" href="#results-tab-5">
 			      <i class="ri-clipboard-line"></i>
               <h4 class="d-none d-lg-block">Boulder</h4>
             </a>
-			    </li>
+			    </li> -->
         </ul>
 
         <div class="tab-content" data-aos="fade-up">
+		
           <div class="tab-pane active show" id="results-tab-1">
             <div class="row">
               <div>
-                <h3>Model Results for All Locations: No Streaming Data</h3>
+			  <p class="fst-italic">
+				  This tab provides a summary overview of the forecast modeling results for the 
+				  batch process models and the 
+				  streaming model results. 
+			  </p>
+                <h3> Model Results for All Locations: No Streaming Data</h3>
                 <p>
-                  The following models were trained using 3 months of training data. For the LSTM model, two weeks were used as a validation set. Finally, two weeks were saved as testing data. 
+                  The following models were trained using 3-months of training data. For the LSTM model, 
+				  nearly three weeks were used as a validation set. Finally, nearly three weeks were saved 
+				  as testing data. The LSTM models with 1-step predicted had the best overall RMSE among all of the models. 
+				  <br><br>
+				  With features added, the RMSE slighly improved for the ARIMA models. 
+				  However, adding features, increased the RMSE for the LSTM and Prophet models. Even with a degraded RMSE, 
+				  the LSTM model with features was better than the improved ARIMA model. Among the benchmark models, the 
+				  average by day of week and hour outperformed most of the models, with the exception of the LSTM models.
+				  For the LSTM models, 6-steps out did worse than 1-step because each 10 minute step past the 
+				  first gets less accurate the further out we predicted. This can be viewed in the image below the table below.
+				  <br><br>
+				  In Boulder, the station locations have similar utilization patterns, which results in the models for each location 
+				  performing relatively similar to each other. The Palo Alto stations have heavier utilization, and more ports 
+				  per station location, which results a greater difference in performance among each model and also higher RMSEs compared to Boulder or Berkeley.
+				  
                 </p>
                 <table>
+					<caption style="caption-side:top"> <strong>
+					No-Streaming Table: Mean RMSE for Test Set by City for All Charging Stations
+					</strong> </caption>
                   <tr>
                     <th>Model Type</th>
                     <th>Parameters</th>
                     <th>Extra Features</th>
-                    <th>Palo Alto: Mean RMSE on Test Set for All Stations</th>
+                    <th>Palo Alto: Mean RMSE</th>
                     <th>Berkeley (SlrpEV): RMSE on Test Set</th>
-                    <th>Boulder: Mean RMSE on Test Set for All Stations</th>
+                    <th>Boulder: Mean RMSE</th>
                   </tr>
                   <tr>
                     <td>Predict Average</td>
                     <td>None</td>
                     <td>No</td>
-                    <td>1.67</td>
-                    <td>1.23</td>
-                    <td>0.47</td>
+                    <td>1.6972</td>
+                    <td>1.2489</td>
+                    <td>0.5144</td>
                   </tr>
-                  <tr>
-                    <td>ARIMA</td>
-                    <td>(p, d, q)</td>
-                    <td>No</td>
-                    <td>?</td>
-                    <td>?</td>
-                    <td>?</td>
-                  </tr>
-                  <tr>
-                    <td>ARIMA</td>
-                    <td>(p, d, q)</td>
+				  <tr>
+                    <td>Predict Average by Day of Week and Hour</td>
+                    <td>None</td>
                     <td>Yes</td>
-                    <td>NEED TO RUN</td>
-                    <td>NEED TO RUN</td>
-                    <td>NEED TO RUN</td>
+                    <td>1.2119</td>
+                    <td>0.9715</td>
+                    <td>0.5010</td>
+                  </tr>
+				  <tr>
+                    <td>Predict Average of Last 12 Timesteps</td>
+                    <td>None</td>
+                    <td>No</td>
+                    <td>2.1400</td>
+                    <td>1.5332</td>
+                    <td>0.5888</td>
+                  </tr>
+                  <tr>
+                    <td>ARIMA</td>
+                    <td>(p, d, q)<br>varied by station</td>
+                    <td>No</td>
+                    <td>1.6923</td>
+                    <td>1.2473</td>
+                    <td>0.5182</td>
+                  </tr>
+                  <tr>
+                    <td>ARIMA</td>
+                    <td>(p, d, q)<br>varied by station</td>
+                    <td>Yes</td>
+                    <td>1.5919</td>
+                    <td>1.2227</td>
+                    <td>0.5079</td>
                   </tr>
                   <tr>
                     <td>Prophet</td>
                     <td>None</td>
                     <td>No</td>
-                    <td>?</td>
-                    <td>?</td>
-                    <td>?</td>
+                    <td>1.2598</td>
+                    <td>1.0746</td>
+                    <td>0.5116</td>
                   </tr>
-                  <tr>
-                    <td>LSTM</td>
-                    <td>Window Size = 6, Predict out 1 timestep</td>
-                    <td>No</td>
-                    <td>?</td>
-                    <td>NEED TO RUN</td>
-                    <td>?</td>
-                  </tr>
-                  <tr>
-                    <td>LSTM</td>
-                    <td>Window Size = 6, Predict out 1 timestep</td>
+				   <tr>
+                    <td>Prophet</td>
+                    <td>None</td>
                     <td>Yes</td>
-                    <td>NEED TO RUN</td>
-                    <td>?</td>
-                    <td>NEED TO RUN</td>
+                    <td>1.3417</td>
+                    <td>1.8120</td>
+                    <td>0.5139</td>
                   </tr>
                   <tr>
                     <td>LSTM</td>
-                    <td>Window Size = 6, Predict out 6 timesteps</td>
+                    <td>Window Size = 12, Predict out 1 timestep</td>
                     <td>No</td>
-                    <td>?</td>
-                    <td>NEED TO RUN</td>
-                    <td>?</td>
+                    <td>0.5993</td>
+                    <td>0.4060</td>
+                    <td>0.1884</td>
                   </tr>
                   <tr>
                     <td>LSTM</td>
-                    <td>Window Size = 6, Predict out 6 timesteps</td>
+                    <td>Window Size = 12, Predict out 1 timestep</td>
                     <td>Yes</td>
-                    <td>NEED TO RUN</td>
-                    <td>?</td>
-                    <td>NEED TO RUN</td>
+                    <td>0.4995</td>
+                    <td>0.4718</td>
+                    <td>0.3060</td>
+                  </tr>
+                  <tr>
+                    <td>LSTM</td>
+                    <td>Window Size = 12, Predict out 6 timesteps</td>
+                    <td>No</td>
+                    <td>0.8876</td>
+                    <td>0.6156</td>
+                    <td>0.4070</td>
+                  </tr>
+                  <tr>
+                    <td>LSTM</td>
+                    <td>Window Size = 12, Predict out 6 timesteps</td>
+                    <td>Yes</td>
+                    <td>0.9604</td>
+                    <td>0.6587</td>
+                    <td>0.3759</td>
                   </tr>
                 </table>
-                <p></p>
-                <h3>Model Results for All Locations: With Streaming Data</h3>
+                <p>
+				<img src="assets/img/MAELSTM6step.png", alt="6-step growing error LSTM" width="100%">
+				</p>
+                <h3> Model Results for All Locations: With Streaming Data</h3>
                 <p>
                   The following models were trained using 3 months of training data. 
-                  Predictions were made using streaming data every 10 minutes, and these predictions are for 6 hours out at a time (total of 36 timesteps). 
-                  Models were retrained monthly. The results below are the average RMSEs for the 36-timestep predictions, averaged by station, averaged by city.
+                  Predictions were made using streaming data every hour, and these predictions are for 6 hours out at a time at the 10-minute level (total of 36 timesteps). 
+                  Models were retrained on the 15th day of each month. The results below are the average RMSEs for the first 6 of the 36-timestep predictions, averaged by station, averaged by city.
+                  For comparison purposes we only looked at the first hour of predictions since Ma et. al (2021) found these to be most accurate.
                   Three months of data were streamed for predictions.
+                  <br><br>
+                  The models have mixed results: the lowest RMSEs for Palo Alto correspond to the first model type, the lowest RMSEs for Berkeley correspond to the LSTM, and the lowest RMSEs for Boulder correspond to the second model type.
                 </p>
                 <table>
+					<caption style="caption-side:top"> <strong>
+					Streaming Table: Mean RMSE for Test Set by City for All Charging Stations
+					</strong> </caption>
                   <tr>
                     <th>Model Type</th>
                     <th>Parameters</th>
                     <th>Extra Features</th>
-                    <th>Palo Alto: Mean RMSE on Test Set for All Stations</th>
-                    <th>Berkeley (SlrpEV): RMSE on Test Set</th>
-                    <th>Boulder: Mean RMSE on Test Set for All Stations</th>
+                    <th>Palo Alto: Mean RMSE</th>
+                    <th>Berkeley (SlrpEV): RMSE</th>
+                    <th>Boulder: Mean RMSE</th>
                   </tr>
                   <tr>
-                    <td>Predict Average</td>
+                    <td>Predict Average by Day of Week and Hour</td>
+                    <td>None</td>
+                    <td>Yes (Averages by Day of Week and Hour)</td>
+                    <td>1.1554</td>
+                    <td>0.9338</td>
+                    <td>0.5030</td>
+                  </tr>
+                  <tr>
+                    <td>Predict Average of Last 12 Timesteps</td>
                     <td>None</td>
                     <td>No</td>
-                    <td>0.50</td>
-                    <td>0.50</td>
-                    <td>0.50</td>
-                  </tr>
-                  <tr>
-                    <td>ARIMA</td>
-                    <td>(0, 1, 1)</td>
-                    <td>Yes</td>
-                    <td>0.25</td>
-                    <td>0.25</td>
-                    <td>0.25</td>
-                  </tr>
-                  <tr>
-                    <td>Prophet</td>
-                    <td>None</td>
-                    <td>Yes</td>
-                    <td>0.25</td>
-                    <td>0.25</td>
-                    <td>0.25</td>
+                    <td>1.1714</td>
+                    <td>0.7393</td>
+                    <td>0.3899</td>
                   </tr>
                   <tr>
                     <td>LSTM</td>
-                    <td>Window Size = 6</td>
-                    <td>Yes</td>
-                    <td>0.05</td>
-                    <td>0.05</td>
-                    <td>0.05</td>
+                    <td>Window Size = 12, Predict out 6 Timesteps</td>
+                    <td>No</td>
+                    <td>1.1812</td>
+                    <td>0.6873</td>
+                    <td>0.4764</td>
                   </tr>
                 </table>
                 
               </div>
             </div>
           </div>
-        <div class="tab-pane" id="results-tab-2">
+		  
+		<div class="tab-pane" id="results-tab-2">
           <div class="row">
-            <div class="col-lg-6 order-2 order-lg-1 mt-3 mt-lg-0">
-              <div>
-					      <!--<h3>Results Dashboard</h3>
-                <div class='tableauPlaceholder' id='viz1658529361441' style='position: relative'>
-                  <noscript>
-                    <a href='#'>
-                      <img alt='Dashboard 1 ' src='https:&#47;&#47;public.tableau.com&#47;static&#47;images&#47;Ch&#47;ChargingAvailability-SlrpEV&#47;Dashboard1&#47;1_rss.png' style='border: none' />
-                    </a>
-                  </noscript>
-                  <object class='tableauViz'  style='display:none;'>
-                    <param name='host_url' value='https%3A%2F%2Fpublic.tableau.com%2F' /> 
-                    <param name='embed_code_version' value='3' /> 
-                    <param name='site_root' value='' />
-                    <param name='name' value='ChargingAvailability-SlrpEV&#47;Dashboard1' />
-                    <param name='tabs' value='no' /><param name='toolbar' value='yes' />
-                    <param name='static_image' value='https:&#47;&#47;public.tableau.com&#47;static&#47;images&#47;Ch&#47;ChargingAvailability-SlrpEV&#47;Dashboard1&#47;1.png' /> 
-                    <param name='animate_transition' value='yes' />
-                    <param name='display_static_image' value='yes' />
-                    <param name='display_spinner' value='yes' />
-                    <param name='display_overlay' value='yes' />
-                    <param name='display_count' value='yes' />
-                    <param name='language' value='en-US' />
-                    <param name='filter' value='publish=yes' />
-                    <param name='device' value='desktop'/>
-                  </object>
-                </div>                
-                <script type='text/javascript'>
-                  var divElement = document.getElementById('viz1658529361441');
-                  var vizElement = divElement.getElementsByTagName('object')[0];
-                  if ( divElement.offsetWidth > 800 ) 
-                  { vizElement.style.width='1000px';vizElement.style.height='627px';} 
-                  else if ( divElement.offsetWidth > 500 ) 
-                  { vizElement.style.width='1000px';vizElement.style.height='627px';} 
-                  else { vizElement.style.width='1000px';vizElement.style.height='627px';}
-                  var scriptElement = document.createElement('script');
-                  scriptElement.src = 'https://public.tableau.com/javascripts/api/viz_v1.js';
-                  vizElement.parentNode.insertBefore(scriptElement, vizElement);
-                </script>-->
-
-                <h3>Results Analysis for All Stations</h3>
-                <div class='tableauPlaceholder' id='viz1658822161677' style='position: relative'>
-                  <noscript>
-                    <a href='#'>
-                      <img alt='Dashboard 1 ' src='https:&#47;&#47;public.tableau.com&#47;static&#47;images&#47;GG&#47;GGBZ6T2H8&#47;1_rss.png' style='border: none' />
-                    </a>
-                  </noscript>
-                  <object class='tableauViz'  style='display:none;'>
-                    <param name='host_url' value='https%3A%2F%2Fpublic.tableau.com%2F' /> 
-                    <param name='embed_code_version' value='3' /> 
-                    <param name='path' value='shared&#47;GGBZ6T2H8' /> 
-                    <param name='toolbar' value='yes' />
-                    <param name='static_image' value='https:&#47;&#47;public.tableau.com&#47;static&#47;images&#47;GG&#47;GGBZ6T2H8&#47;1.png' /> 
-                    <param name='animate_transition' value='yes' />
-                    <param name='display_static_image' value='yes' />
-                    <param name='display_spinner' value='yes' />
-                    <param name='display_overlay' value='yes' />
-                    <param name='display_count' value='yes' />
-                    <param name='language' value='en-US' />
-                    <param name='filter' value='publish=yes' />
-                    <param name='device' value='desktop'/>
-                  </object>
-                </div>                
-                <script type='text/javascript'>                    
-                  var divElement = document.getElementById('viz1658822161677');                    
-                  var vizElement = divElement.getElementsByTagName('object')[0];                    
-                  if ( divElement.offsetWidth > 800 ) { vizElement.style.width='1000px';vizElement.style.height='827px';} 
-                  else if ( divElement.offsetWidth > 500 ) { vizElement.style.width='1000px';vizElement.style.height='827px';} 
-                  else { vizElement.style.width='1000px';vizElement.style.height='827px';}                     
-                  var scriptElement = document.createElement('script');                    
-                  scriptElement.src = 'https://public.tableau.com/javascripts/api/viz_v1.js';                    
-                  vizElement.parentNode.insertBefore(scriptElement, vizElement);                
-                </script>
-
-              <h3><br>Streaming Results: Predicted vs Actual Ports Available</h3>
-              <div class='tableauPlaceholder' id='viz1658821353691' style='position: relative'>
+            <div>
+              <h3>Batch Modeling Results</h3>
+               <p class="fst-italic">Below is a Tableau dashboard with the batch modeling results (no streaming) by charging station location. Overall the LSTM models performed the best.
+			   The first page provides the RMSE per charging station location by each model. The second page allows you to compare the predicted ports against actual ports available.</p> 
+			   <!-- Tableau Dashboard embed code-->
+			   <div class='tableauPlaceholder' id='viz1659066032281' style='position: relative'><noscript><a href='#'>
+			   <img alt='Evaluation Metrics ' src='https:&#47;&#47;public.tableau.com&#47;static&#47;images&#47;Ch&#47;ChargedUpBatchPredictionResults&#47;EvaluationMetrics&#47;1_rss.png' style='border: none' />
+			   </a></noscript><object class='tableauViz'  style='display:none;'><param name='host_url' value='https%3A%2F%2Fpublic.tableau.com%2F' /> <param name='embed_code_version' value='3' /> <param name='site_root' value='' />
+			   <param name='name' value='ChargedUpBatchPredictionResults&#47;EvaluationMetrics' /><param name='tabs' value='no' /><param name='toolbar' value='yes' />
+			   <param name='static_image' value='https:&#47;&#47;public.tableau.com&#47;static&#47;images&#47;Ch&#47;ChargedUpBatchPredictionResults&#47;EvaluationMetrics&#47;1.png' /> <param name='animate_transition' value='yes' />
+			   <param name='display_static_image' value='yes' /><param name='display_spinner' value='yes' /><param name='display_overlay' value='yes' /><param name='display_count' value='yes' /><param name='language' value='en-US' /><param name='filter' value='publish=yes' />
+			   </object></div>                
+			   <script type='text/javascript'>
+							var divElement = document.getElementById('viz1659066032281'); 
+							var vizElement = divElement.getElementsByTagName('object')[0];
+							if ( divElement.offsetWidth > 800 ) { vizElement.style.width='1500px';vizElement.style.height='1527px';} else if ( divElement.offsetWidth > 500 ) { vizElement.style.width='1500px';vizElement.style.height='1527px';} else { vizElement.style.width='1500px';vizElement.style.height='1527px';}
+							var scriptElement = document.createElement('script');                    scriptElement.src = 'https://public.tableau.com/javascripts/api/viz_v1.js';                    vizElement.parentNode.insertBefore(scriptElement, vizElement);                
+							</script>
+			   <!--End of embed code-->
+            </div>
+          </div>
+        </div>
+		
+		
+		
+        <div class="tab-pane" id="results-tab-3">
+          <div class="row">
+            <!--<div class="col-lg-6 order-2 order-lg-1 mt-3 mt-lg-0">-->
+            <div>
+              <!--<h3>Results Dashboard</h3>
+              <div class='tableauPlaceholder' id='viz1658529361441' style='position: relative'>
                 <noscript>
                   <a href='#'>
-                    <img alt='Dashboard 2 ' src='https:&#47;&#47;public.tableau.com&#47;static&#47;images&#47;Y7&#47;Y7484F2W6&#47;1_rss.png' style='border: none' />
-                  </a>
-                </noscript>
-                <object class='tableauViz'  style='display:none;'>
-                  <param name='host_url' value='https%3A%2F%2Fpublic.tableau.com%2F' /> 
-                  <param name='embed_code_version' value='3' /> 
-                  <param name='path' value='shared&#47;Y7484F2W6' /> 
-                  <param name='toolbar' value='yes' />
-                  <param name='static_image' value='https:&#47;&#47;public.tableau.com&#47;static&#47;images&#47;Y7&#47;Y7484F2W6&#47;1.png' /> 
-                  <param name='animate_transition' value='yes' />
-                  <param name='display_static_image' value='yes' />
-                  <param name='display_spinner' value='yes' />
-                  <param name='display_overlay' value='yes' />
-                  <param name='display_count' value='yes' />
-                  <param name='language' value='en-US' />
-                  <param name='filter' value='publish=yes' />
-                  <param name='device' value='desktop'/>
-                </object>
-              </div>                
-              <script type='text/javascript'>                    
-                var divElement = document.getElementById('viz1658821353691');                    
-                var vizElement = divElement.getElementsByTagName('object')[0];                    
-                if ( divElement.offsetWidth > 800 ) 
-                { vizElement.style.width='820px';vizElement.style.height='647px';} 
-                else if ( divElement.offsetWidth > 500 ) 
-                { vizElement.style.width='820px';vizElement.style.height='647px';} 
-                else { vizElement.style.width='820px';vizElement.style.height='647px';}                     
-                var scriptElement = document.createElement('script');                    
-                scriptElement.src = 'https://public.tableau.com/javascripts/api/viz_v1.js';                    
-                vizElement.parentNode.insertBefore(scriptElement, vizElement);                
-              </script>  
-
-              <h3><br>Results for User</h3>
-              <div class='tableauPlaceholder' id='viz1658821960402' style='position: relative'>
-                <noscript>
-                  <a href='#'>
-                    <img alt='Dashboard 3 ' src='https:&#47;&#47;public.tableau.com&#47;static&#47;images&#47;W2&#47;W210-ErrorAnalysis&#47;Dashboard3&#47;1_rss.png' style='border: none' />
+                    <img alt='Dashboard 1 ' src='https:&#47;&#47;public.tableau.com&#47;static&#47;images&#47;Ch&#47;ChargingAvailability-SlrpEV&#47;Dashboard1&#47;1_rss.png' style='border: none' />
                   </a>
                 </noscript>
                 <object class='tableauViz'  style='display:none;'>
                   <param name='host_url' value='https%3A%2F%2Fpublic.tableau.com%2F' /> 
                   <param name='embed_code_version' value='3' /> 
                   <param name='site_root' value='' />
-                  <param name='name' value='W210-ErrorAnalysis&#47;Dashboard3' />
+                  <param name='name' value='ChargingAvailability-SlrpEV&#47;Dashboard1' />
+                  <param name='tabs' value='no' /><param name='toolbar' value='yes' />
+                  <param name='static_image' value='https:&#47;&#47;public.tableau.com&#47;static&#47;images&#47;Ch&#47;ChargingAvailability-SlrpEV&#47;Dashboard1&#47;1.png' /> 
+                  <param name='animate_transition' value='yes' />
+                  <param name='display_static_image' value='yes' />
+                  <param name='display_spinner' value='yes' />
+                  <param name='display_overlay' value='yes' />
+                  <param name='display_count' value='yes' />
+                  <param name='language' value='en-US' />
+                  <param name='filter' value='publish=yes' />
+                  <param name='device' value='desktop'/>
+                </object>
+              </div>                
+              <script type='text/javascript'>
+                var divElement = document.getElementById('viz1658529361441');
+                var vizElement = divElement.getElementsByTagName('object')[0];
+                if ( divElement.offsetWidth > 800 ) 
+                { vizElement.style.width='1000px';vizElement.style.height='627px';} 
+                else if ( divElement.offsetWidth > 500 ) 
+                { vizElement.style.width='1000px';vizElement.style.height='627px';} 
+                else { vizElement.style.width='1000px';vizElement.style.height='627px';}
+                var scriptElement = document.createElement('script');
+                scriptElement.src = 'https://public.tableau.com/javascripts/api/viz_v1.js';
+                vizElement.parentNode.insertBefore(scriptElement, vizElement);
+              </script>-->
+
+              <h3>Results Analysis for All Stations</h3>
+			  <p class="fst-italic">
+			    Below is a Tableau dashboard with the results for the streaming models. You can view the RMSE for all stations on the RMSE View page. On the Single Station 
+				View page, you can compare the predictions with the actuals and see how these change as more data is streamed into the model. 
+        The Single Station User View is what an EV driver might see as a forecast of charging station availability over the next 6 hours. 
+        This page only includes the predicted availability since in a practical setting, we would not know the actual availability in the future.
+				</p>
+              <div class='tableauPlaceholder' id='viz1659248429048' style='position: relative'>
+                <noscript>
+                  <a href='#'> 
+                    <img alt='Dashboard 1 ' src='https:&#47;&#47;public.tableau.com&#47;static&#47;images&#47;W2&#47;W210-ErrorAnalysis&#47;Dashboard1&#47;1_rss.png' style='border: none' />
+                  </a>
+                </noscript>
+                <object class='tableauViz'  style='display:none;'>
+                  <param name='host_url' value='https%3A%2F%2Fpublic.tableau.com%2F' /> 
+                  <param name='embed_code_version' value='3' /> <param name='site_root' value='' />
+                  <param name='name' value='W210-ErrorAnalysis&#47;Dashboard1' />
                   <param name='tabs' value='no' />
                   <param name='toolbar' value='yes' />
-                  <param name='static_image' value='https:&#47;&#47;public.tableau.com&#47;static&#47;images&#47;W2&#47;W210-ErrorAnalysis&#47;Dashboard3&#47;1.png' /> 
+                  <param name='static_image' value='https:&#47;&#47;public.tableau.com&#47;static&#47;images&#47;W2&#47;W210-ErrorAnalysis&#47;Dashboard1&#47;1.png' /> 
                   <param name='animate_transition' value='yes' />
                   <param name='display_static_image' value='yes' />
                   <param name='display_spinner' value='yes' />
@@ -1275,40 +1308,145 @@
                 </object>
               </div>                
               <script type='text/javascript'>                    
-                var divElement = document.getElementById('viz1658821960402');                    
+                var divElement = document.getElementById('viz1659248429048');                    
                 var vizElement = divElement.getElementsByTagName('object')[0];                    
                 if ( divElement.offsetWidth > 800 ) 
-                { vizElement.style.width='820px';vizElement.style.height='647px';} 
+                { vizElement.style.width='100%';vizElement.style.height=(divElement.offsetWidth*0.75)+'px';} 
                 else if ( divElement.offsetWidth > 500 ) 
-                { vizElement.style.width='820px';vizElement.style.height='647px';} 
-                else { vizElement.style.width='820px';vizElement.style.height='647px';}                     
+                { vizElement.style.width='100%';vizElement.style.height=(divElement.offsetWidth*0.75)+'px';} 
+                else { vizElement.style.width='100%';vizElement.style.height='750px';}                     
                 var scriptElement = document.createElement('script');                    
                 scriptElement.src = 'https://public.tableau.com/javascripts/api/viz_v1.js';                    
-                vizElement.parentNode.insertBefore(scriptElement, vizElement);               
+                vizElement.parentNode.insertBefore(scriptElement, vizElement);                
               </script>
-				      </div>
+
+            <!--<h3><br>Streaming Results: Predicted vs Actual Ports Available</h3>
+            <div class='tableauPlaceholder' id='viz1658821353691' style='position: relative'>
+              <noscript>
+                <a href='#'>
+                  <img alt='Dashboard 2 ' src='https:&#47;&#47;public.tableau.com&#47;static&#47;images&#47;Y7&#47;Y7484F2W6&#47;1_rss.png' style='border: none' />
+                </a>
+              </noscript>
+              <object class='tableauViz'  style='display:none;'>
+                <param name='host_url' value='https%3A%2F%2Fpublic.tableau.com%2F' /> 
+                <param name='embed_code_version' value='3' /> 
+                <param name='path' value='shared&#47;Y7484F2W6' /> 
+                <param name='toolbar' value='yes' />
+                <param name='static_image' value='https:&#47;&#47;public.tableau.com&#47;static&#47;images&#47;Y7&#47;Y7484F2W6&#47;1.png' /> 
+                <param name='animate_transition' value='yes' />
+                <param name='display_static_image' value='yes' />
+                <param name='display_spinner' value='yes' />
+                <param name='display_overlay' value='yes' />
+                <param name='display_count' value='yes' />
+                <param name='language' value='en-US' />
+                <param name='filter' value='publish=yes' />
+                <param name='device' value='desktop'/>
+              </object>
+            </div>                
+            <script type='text/javascript'>                    
+              var divElement = document.getElementById('viz1658821353691');                    
+              var vizElement = divElement.getElementsByTagName('object')[0];                    
+              if ( divElement.offsetWidth > 800 ) 
+              { vizElement.style.width='820px';vizElement.style.height='647px';} 
+              else if ( divElement.offsetWidth > 500 ) 
+              { vizElement.style.width='820px';vizElement.style.height='647px';} 
+              else { vizElement.style.width='820px';vizElement.style.height='647px';}                     
+              var scriptElement = document.createElement('script');                    
+              scriptElement.src = 'https://public.tableau.com/javascripts/api/viz_v1.js';                    
+              vizElement.parentNode.insertBefore(scriptElement, vizElement);                
+            </script>  
+
+            <h3><br>Results for User</h3>
+            <div class='tableauPlaceholder' id='viz1658821960402' style='position: relative'>
+              <noscript>
+                <a href='#'>
+                  <img alt='Dashboard 3 ' src='https:&#47;&#47;public.tableau.com&#47;static&#47;images&#47;W2&#47;W210-ErrorAnalysis&#47;Dashboard3&#47;1_rss.png' style='border: none' />
+                </a>
+              </noscript>
+              <object class='tableauViz'  style='display:none;'>
+                <param name='host_url' value='https%3A%2F%2Fpublic.tableau.com%2F' /> 
+                <param name='embed_code_version' value='3' /> 
+                <param name='site_root' value='' />
+                <param name='name' value='W210-ErrorAnalysis&#47;Dashboard3' />
+                <param name='tabs' value='no' />
+                <param name='toolbar' value='yes' />
+                <param name='static_image' value='https:&#47;&#47;public.tableau.com&#47;static&#47;images&#47;W2&#47;W210-ErrorAnalysis&#47;Dashboard3&#47;1.png' /> 
+                <param name='animate_transition' value='yes' />
+                <param name='display_static_image' value='yes' />
+                <param name='display_spinner' value='yes' />
+                <param name='display_overlay' value='yes' />
+                <param name='display_count' value='yes' />
+                <param name='language' value='en-US' />
+                <param name='filter' value='publish=yes' />
+                <param name='device' value='desktop'/>
+              </object>
+            </div>                
+            <script type='text/javascript'>                    
+              var divElement = document.getElementById('viz1658821960402');                    
+              var vizElement = divElement.getElementsByTagName('object')[0];                    
+              if ( divElement.offsetWidth > 800 ) 
+              { vizElement.style.width='820px';vizElement.style.height='647px';} 
+              else if ( divElement.offsetWidth > 500 ) 
+              { vizElement.style.width='820px';vizElement.style.height='647px';} 
+              else { vizElement.style.width='820px';vizElement.style.height='647px';}                     
+              var scriptElement = document.createElement('script');                    
+              scriptElement.src = 'https://public.tableau.com/javascripts/api/viz_v1.js';                    
+              vizElement.parentNode.insertBefore(scriptElement, vizElement);               
+            </script>-->
             </div>
+            <!--</div>-->
           </div>
         </div>
 		  
-        <div class="tab-pane" id="results-tab-3">
+
+		
+		<div class="tab-pane" id="results-tab-4">
           <div class="row">
-            <div>
-              <h3>Palo Alto Results</h3>
-                
-            </div>
-          </div>
-        </div>
-		    <div class="tab-pane" id="results-tab-4">
-          <div class="row">
-            <h3>Berkeley Results</h3>
-            <p>
-              Ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate
-              velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in
-              culpa qui officia deserunt mollit anim id est laborum
+            <h3>SlrpEV Results</h3>
+            <p class="fst-italic">
+              As part of our partnership with the Energy, Controls, & Applications Lab at UC Berkeley, we performed an additional analysis to predict power consumption at the SlrpEV charging stations on UC Berkeley's campus.
+              The power for these stations is measured in Watts, and for the LSTM models, we rounded the predictions as necessary so they made sense (ex. no negative powers and no powers greater than 80 kW, or 10 kW per station).
             </p>
+            <div class='tableauPlaceholder' id='viz1659249032206' style='position: relative'>
+              <noscript>
+                <a href='#'>
+                  <img alt='Dashboard 1 ' src='https:&#47;&#47;public.tableau.com&#47;static&#47;images&#47;W2&#47;W210-PowerErrorAnalysis2&#47;Dashboard1&#47;1_rss.png' style='border: none' />
+                </a>
+              </noscript>
+              <object class='tableauViz'  style='display:none;'>
+                <param name='host_url' value='https%3A%2F%2Fpublic.tableau.com%2F' /> 
+                <param name='embed_code_version' value='3' /> 
+                <param name='site_root' value='' />
+                <param name='name' value='W210-PowerErrorAnalysis2&#47;Dashboard1' />
+                <param name='tabs' value='no' />
+                <param name='toolbar' value='yes' />
+                <param name='static_image' value='https:&#47;&#47;public.tableau.com&#47;static&#47;images&#47;W2&#47;W210-PowerErrorAnalysis2&#47;Dashboard1&#47;1.png' /> 
+                <param name='animate_transition' value='yes' />
+                <param name='display_static_image' value='yes' />
+                <param name='display_spinner' value='yes' />
+                <param name='display_overlay' value='yes' />
+                <param name='display_count' value='yes' />
+                <param name='language' value='en-US' />
+                <param name='filter' value='publish=yes' />
+                <param name='device' value='desktop'/>
+              </object>
+            </div>                
+            <script type='text/javascript'>                    
+              var divElement = document.getElementById('viz1659249032206');                    
+              var vizElement = divElement.getElementsByTagName('object')[0];                    
+              if ( divElement.offsetWidth > 800 ) 
+                { vizElement.style.width='100%';vizElement.style.height=(divElement.offsetWidth*0.75)+'px';}
+              else if ( divElement.offsetWidth > 500 ) 
+                { vizElement.style.width='100%';vizElement.style.height=(divElement.offsetWidth*0.75)+'px';} 
+              else 
+                { vizElement.style.width='100%';vizElement.style.height='750px';}                
+              var scriptElement = document.createElement('script');                    
+              scriptElement.src = 'https://public.tableau.com/javascripts/api/viz_v1.js';                    
+              vizElement.parentNode.insertBefore(scriptElement, vizElement);                
+            </script>
           </div>
         </div>
+		<!--
         <div class="tab-pane" id="results-tab-5">
           <div class="row">
             <h3>Boulder Results</h3>
@@ -1318,7 +1456,7 @@
               culpa qui officia deserunt mollit anim id est laborum
             </p>
           </div>
-        </div>
+        </div>-->
 		  
 		  
         </div>
@@ -1331,10 +1469,9 @@
         <div class="section-title" data-aos="zoom-out">
           <h2>Map</h2>
           <p>Interactive Map of Charging Station Predictions</p>
-
-          <iframe src="https://andytertzakian.github.io/chargedup.github.io/maps/MAP.html" width="100%" height="700"  frameborder="0"></iframe>
-
         </div>
+		<p class="fst-italic">Select a charging station to view the predicted availability of charging ports!</p>
+		<iframe src="https://andytertzakian.github.io/chargedup.github.io/maps/MAP.html" width="100%" height="700"  frameborder="0"></iframe>
       </div>
     </section>
 
@@ -1634,8 +1771,9 @@
             <div data-bs-toggle="collapse" class="collapsed question" href="#faq1">What are the different types of electric vehicles? <i class="bi bi-chevron-down icon-show"></i><i class="bi bi-chevron-up icon-close"></i></div>
             <div id="faq1" class="collapse" data-bs-parent=".faq-list">
               <p>
-                Battery Electric Vehicle (BEV), Plug-in Hybrid Electric Vehicle (PHEV), Hybrid (HEV), and Hydrogen Fuel Cell are all electric vehicles. Only BEVs and PHEVs are chargeable at EV charging stations. 
-                BEVs are fully electric and do not have a gasoline fuel tank, whereas PHEVs have both a rechargeable battery and a gas tank. PHEVs tend to have smaller battery capacities than BEVs.
+                Battery Electric Vehicle (BEV), Plug-in Hybrid Electric Vehicle (PHEV), Hybrid Electric Vehicle (HEV), and Hydrogen Fuel Cell Vehicles are all electric vehicles. Only BEVs and PHEVs are chargeable at EV charging stations. 
+                BEVs are fully electric and do not have a gasoline fuel tank, whereas PHEVs have both a rechargeable battery and a gas tank. PHEVs tend to have smaller battery capacities than BEVs. 
+                HEVs do not have a battery pack that can be charged at an EV charging station, and hydrogen fuel cell vehicles are refueled with hydrogen, rather than electricity.
               </p>
             </div>
           </li>
@@ -1645,7 +1783,7 @@
             <div id="faq2" class="collapse" data-bs-parent=".faq-list">
               <p>
                 There are three main types of EV charging stations: Level 1, Level 2, and DC Fast Charging (DCFC).
-                Level 1 is the slowest charger, typically used for household charging. Level 2: is faster than Level 1. If used at home, Level 2 chargers requires rewiring, otherwise EV drivers must use public charging stations for access to Level 2 chargers.
+                Level 1 is the slowest charger, typically used for household charging. Level 2 is faster than Level 1. If used at home, Level 2 chargers require rewiring, otherwise EV drivers must use public charging stations for access to Level 2 chargers.
                 DCFCs are fast chargers, only for BEVs. They can charge an EV in 30 minutes and are ideal for road trips or long drives.
               </p>
             </div>
@@ -1665,7 +1803,7 @@
             <div data-bs-toggle="collapse" href="#faq4" class="collapsed question">What is the difference between a kW and a kWh? <i class="bi bi-chevron-down icon-show"></i><i class="bi bi-chevron-up icon-close"></i></div>
             <div id="faq4" class="collapse" data-bs-parent=".faq-list">
               <p>
-                A kW is a rate of electricity usage, while a kWh reflects the total amount of electricity used. In EVs, kWh referrs to the energy capacity of a battery.
+                A kW (kilowatt) is a rate of electricity usage, while a kWh (kilowatt-hour) reflects the total amount of electricity used. In EVs, kWh can also refer to the energy capacity of a battery.
               </p>
             </div>
           </li>
@@ -1676,7 +1814,7 @@
               <p>
                 In this project, we avoid using "charging station" as a single term since there is ambiguity around the definition.
                 Instead, we stick to "charging station location" and "charging port" to distinguish between different features.
-                According to the Alternative Fuels Data Center (AFDC), a "station loction" is a site with one or more electric vehicle supply equipment (EVSE) ports at the same address. This could include a parking garage or mall parking lot.
+                According to the Alternative Fuels Data Center (AFDC), a "station location" is a site with one or more electric vehicle supply equipment (EVSE) ports at the same address. This could include a parking garage or mall parking lot.
                 An EVSE port provides power to charge only one vehicle at a time. 
                 You can read more about Charging Infrastructure Terminology through the <a href = "https://afdc.energy.gov/fuels/electricity_infrastructure.html">AFDC</a>.
               </p>
@@ -1816,11 +1954,8 @@
               </div>
               <div class="text-center"><button type="submit">Send Message</button></div>
             </form>
-
           </div>
-
         </div>
-
       </div> -->
     </section><!-- End Contact Section -->
 
@@ -1831,13 +1966,17 @@
     <div class="container">
       <h3>ChargedUp</h3>
       <p>UC Berkeley Master of Information & Data Science Program -- Capstone Project (Summer 2022)</p>
-      <div class="social-links">
-        <a href="#" class="twitter"><i class="bx bxl-twitter"></i></a>
+	  <div class="social-links">
+	  <a href="https://github.com/AndyTertzakian/ChargedUp" class="github"><i class="bx bxl-github"></i></a>
+	  <!--
+		<a href="#" class="twitter"><i class="bx bxl-twitter"></i></a>
         <a href="#" class="facebook"><i class="bx bxl-facebook"></i></a>
         <a href="#" class="instagram"><i class="bx bxl-instagram"></i></a>
         <a href="#" class="google-plus"><i class="bx bxl-skype"></i></a>
         <a href="#" class="linkedin"><i class="bx bxl-linkedin"></i></a>
-      </div>
+		-->
+      </div> 
+	
       <div class="copyright">
         &copy; Copyright <strong><span>ChargedUp</span></strong>. All Rights Reserved
       </div>

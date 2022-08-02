@@ -60,6 +60,11 @@ from fbprophet import Prophet
 # Saving plots
 import io
 
+# Prevent Java tracking logs
+import logging
+logger = spark._jvm.org.apache.log4j
+logging.getLogger("py4j.java_gateway").setLevel(logging.ERROR)
+
 # COMMAND ----------
 
 # MAGIC %md
@@ -107,6 +112,11 @@ def write_seed_to_s3(df, save_filename):
         .format("parquet")
         .mode("overwrite")
         .save(f"/mnt/{mount_name}/data/{save_filename}"))
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC ## LSTM Reference Functions
 
 # COMMAND ----------
 
@@ -160,29 +170,37 @@ def dfSplit_Xy(df, date_col='datetime', n_input=6, n_out=36):
     return np.array(X), np.array(y), np.array(y_dates)
 
 
-def split_train_test(X, y):
+def split_train_test(X, y, y_dates, train_prop = 0.7, dev_prop = 0.15):
     '''
     Split inputs and labels into train, validation and test sets for LSTMs
     Returns x and y arrays for train, validation, and test.
     '''
     
-    dev_prop, train_prop = 14/90, 1 - (14/90)
-    
     # get size of Array
     num_timestamps = X.shape[0]
     
+    
+    # define split proportions - can consider making this input to functions
+    train_proportion = float(train_prop) # consider input
+    dev_proportion = float(dev_prop) # consider input
+    test_proportion = (1 - train_proportion - dev_proportion) # can leave this as is
+    
+    
     # define split points
     train_start = 0 # do we need this? can we always start at 0?
-    train_end = int(num_timestamps * train_prop)
-    dev_end = int(num_timestamps * (train_prop + dev_prop))
+    train_end = int(num_timestamps * train_proportion)
+    dev_end = int(num_timestamps * (train_proportion + dev_proportion))
+    
     
     # splitting
     X_train, y_train = X[train_start:train_end], y[train_start:train_end]#, y_dates[train_start:train_end]
     X_val, y_val = X[train_end:dev_end], y[train_end:dev_end]#, y_dates[train_end:dev_end]
     # include dates for plotting later
-    print(X_train.shape, y_train.shape, X_val.shape, y_val.shape, X_train.shape[0])
+    X_test, y_test, yd_test = X[dev_end:], y[dev_end:], y_dates[dev_end:]
+    print(X_train.shape, y_train.shape, X_val.shape, y_val.shape, X_test.shape, y_test.shape, X_train.shape[0], yd_test.shape)
     
-    return X_train, y_train, X_val, y_val
+    
+    return X_train, y_train, X_val, y_val, X_test, y_test, X_train.shape[0], yd_test
 
 def run_lstm(n_inputs, n_features, n_outputs, X_train, y_train, X_val, y_val, n_epochs = 10):
     '''Run lstm model, and get fitted model'''
@@ -190,7 +208,7 @@ def run_lstm(n_inputs, n_features, n_outputs, X_train, y_train, X_val, y_val, n_
     # Build LSTM Model
     model = Sequential()
     model.add(InputLayer((n_inputs, n_features))) 
-    model.add(LSTM(64, input_shape = (n_inputs, n_features)))
+    model.add(LSTM(64, input_shape = (n_inputs, n_features), activation = 'relu'))
     model.add(Dense(8, 'relu'))
     model.add(Dense(n_outputs, 'linear'))
     model.summary()
@@ -209,11 +227,98 @@ def run_lstm(n_inputs, n_features, n_outputs, X_train, y_train, X_val, y_val, n_
 
 # COMMAND ----------
 
+def plot_predictions(model, X_test, y_test, train_df, station, train_end, date_col, y_dates, start=0, end=1000):
+    '''
+    function to plot actual, predictions and rounded predictions
+    model: is trained lstm model
+    X: features matrix
+    y: label array
+    train_df: data frame with all records
+    station: filter for specific station
+    train_end: index of end of training set
+    date_col: column name as str
+    start: index on where to start to show results
+    end: index on where to end results want to show
+    '''
+    
+    all_test_timestamps = y_dates.flatten()
+
+
+    ### get predictions, vector of predictions with inputs and flatten
+    predictions = model.predict(X_test)
+    predictions = predictions.flatten()
+    
+#     predictions_rounded = np.round(predictions)
+
+#     print(predictions.shape)
+    # should return dataframe
+    df = pd.DataFrame(data = {'Predictions': predictions,
+                              'Actuals': y_test.flatten(),
+                              'DateTime': all_test_timestamps})
+    
+    rounded = pd.DataFrame(data = {'Predictions (rounded)': predictions})
+    
+    # Round the predictions to (# of stations * ~10 kW) as upper bound, and 0 as lower bound
+    rounded = rounded.clip(upper = pd.Series({'Predictions (rounded)': 8 * 10000}), 
+                           lower = pd.Series({'Predictions (rounded)': 0}), axis=1)
+    
+    df['Predictions (rounded)'] = rounded['Predictions (rounded)']
+    
+    df['DateTime'] = all_test_timestamps
+    
+    print(df.head())
+    
+    ### evaluation metrics
+    MSE_raw = mse(y_test.flatten(), predictions)
+    MSE_rounded = mse(y_test.flatten(), df['Predictions (rounded)'])
+    RMSE_raw = math.sqrt(MSE_raw)
+    RMSE_rounded = math.sqrt(MSE_rounded)
+
+    Evals = dict({station: 
+                 dict(
+                     {'MSE_Raw': MSE_raw,
+                      'MSE_round': MSE_rounded,
+                      'RMSE_Raw': RMSE_raw,
+                      'RMSE': RMSE_rounded
+                     }) 
+                })
+    
+    
+    #### this entire section can be separate, and do not need start and end, can filter outputed df beforehand if needed smaller dataset
+    
+    #### plot 
+    plt.subplots(figsize = (15,7))
+    # plot a portion of the time series
+    plt.plot(df['DateTime'][start:end], df['Predictions'][start:end], label = 'Predicted')
+    plt.plot(df['DateTime'][start:end], df['Predictions (rounded)'][start:end], label= 'Predicted (rounded)')
+    plt.plot(df['DateTime'][start:end], df['Actuals'][start:end], label = 'Actual')
+
+    plt.xlabel('DateTime', fontsize = 16);
+    plt.ylabel('Number of Available Stations', fontsize = 16);
+    plt.legend(fontsize = 14);
+    plt.title('Charging Station Availability for ' + station, fontsize = 18);
+
+    return df, Evals
+
+# COMMAND ----------
+
 # MAGIC %md
 # MAGIC ## ARIMA Reference Functions
+# MAGIC 
+# MAGIC `arima_filter`
+# MAGIC 
 # MAGIC `split2_TrainTest`
 # MAGIC 
 # MAGIC `plot_predsActuals`
+
+# COMMAND ----------
+
+def arima_filter(df, start_date, end_date, date_col):
+    ''' 
+    filter data frame to be between the start date and end date, not including the end date. 
+    date_col is the date column used to filter the dataframe
+    '''
+    return df[(df[date_col] >= start_date) & (df[date_col] < end_date)] 
 
 # COMMAND ----------
 
@@ -365,7 +470,11 @@ slrp_test_features = add_features(slrp_test)
 
 # COMMAND ----------
 
-slrp_features.head()
+####### Filtering data to 129 days ###########
+## Use for training 3 months of data in a 70/30 train test split --> means we should select 129 days for training + test data
+start = dt.datetime(2021, 11, 1)
+end_date = (start + dt.timedelta(days = int(129))).replace(hour = 0, minute = 0, second = 0)
+slrp_feat = arima_filter(slrp_features, start, end_date, 'datetime')
 
 # COMMAND ----------
 
@@ -490,7 +599,7 @@ def run_arima(traindf, testdf, actualcol, date_col, station, no_features = True)
         pred = model.predict(start = traindf.shape[0], end = traindf.shape[0] + testdf.shape[0] - 1, typ='levels')
 
         ### getting actual data from previous data
-        testdf.rename(columns={actualcol: "Actuals", date_col: 'DateTime'}, inplace = True)
+        testdf = testdf.rename(columns={actualcol: "Actuals", date_col: 'DateTime'})
 
         ## createdf to output
         testdf['predictions'] = pred.values
@@ -526,7 +635,7 @@ def run_arima(traindf, testdf, actualcol, date_col, station, no_features = True)
                              typ='levels')
 
         ### getting actual data from previous data
-        testdf.rename(columns={actualcol: "Actuals", date_col: 'DateTime'}, inplace = True)
+        testdf = testdf.rename(columns={actualcol: "Actuals", date_col: 'DateTime'})
 
         ## createdf to output
         testdf['predictions'] = pred.values
@@ -702,25 +811,11 @@ print(slrp_rmse_1)
 
 # COMMAND ----------
 
-## Using two weeks as testing data only
-slrp_preds_1 = predict_average_overall(slrp_seed, 6*24*14)
-slrp_rmse_1 = calc_rmse(slrp_preds_1, slrp_test.head(6*24*14))
-print(slrp_rmse_1)
-
-# COMMAND ----------
-
 # DBTITLE 1,Benchmark Model 2A: Predict Average of Last n Timestamps (No Streaming)
 n_in = 12
 n_out = slrp_test.shape[0]
 slrp_preds_2a = predict_average_n_timestamps(slrp_seed, n_in, n_out)
 slrp_rmse_2a = calc_rmse(slrp_preds_2a, slrp_test.head(n_out))
-print(slrp_rmse_2a)
-
-# COMMAND ----------
-
-## Using two weeks as testing data only
-slrp_preds_2a = predict_average_n_timestamps(slrp_seed, n_in, 6*24*14)
-slrp_rmse_2a = calc_rmse(slrp_preds_2a, slrp_test.head(6*24*14))
 print(slrp_rmse_2a)
 
 # COMMAND ----------
@@ -838,7 +933,7 @@ arima_eval(slrp_seed, slrp_test.head(1008*9), actual_col, date_col, station, mod
 date_col = 'datetime'
 actualcol= 'power_W'
 station = 'Slrp'
-df = slrp_features.drop(columns = 'station')
+df = slrp_feat.drop(columns = 'station')
  
 ## run EDA
 # arima_eda(df, 'power_W', 25, df.shape[0]-1)
@@ -892,7 +987,7 @@ print("{'Slrp': {'MSE_raw': 23219139.299191058, 'MSE_round': 23219153.478376098,
 date_col = 'datetime'
 actual_col= 'power_W'
 station = 'Slrp'
-df = slrp_features.drop(columns = ['station'])
+df = slrp_feat.drop(columns = ['station'])
 
 slrp_prophet_train, slrp_prophet_test = split2_TrainTest(df, 0.7)
 
@@ -903,12 +998,164 @@ plot_predsActuals(prophet_testdf2, 'yhat', 'rounded', 'Actuals', 'DateTime', 'Sl
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC ## LSTM
+# MAGIC ## LSTM -- No Streaming
 
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC ### No Streaming
+# MAGIC ### Single Step Predictions, `n_outputs=1`
+
+# COMMAND ----------
+
+## No features
+date_col = 'datetime'
+actualcol= 'power_W'
+station = 'Slrp'
+n_inputs = 12
+n_outputs = 1
+loc_ = 'Berkeley'
+
+df = slrp_feat[[date_col, actualcol]]
+lstm1_slrp_metrics = dict()
+
+
+##### split into array format
+X, y, y_dates = dfSplit_Xy(df, date_col, n_inputs, n_outputs)
+
+#### split into train, val, and test
+X_train, y_train, X_val, y_val, X_test, y_test, train_end, y_dates = split_train_test(X, y, y_dates)
+
+print()
+print(station)
+
+### run model
+lstm1_modelslrp = run_lstm(X_train.shape[1], X_train.shape[2], y_train.shape[1], X_train, y_train, X_val, y_val, n_epochs = 10)
+
+### plot and get results df and metrics
+df_out, evals = plot_predictions(lstm1_modelslrp, X_test, y_test, df, station, train_end, date_col, y_dates, 0, y_test.shape[0])
+
+# capture agg metrics
+lstm1_slrp_metrics.update(evals)
+
+#### add additional dataframe columns for visualizations
+# df['Location'] = loc_
+# df['SiteName'] = station
+# df['StepsOut'] = np.tile(np.arange(1, y_test.shape[1]+1, 1),  y_test.shape[0])
+
+print(lstm1_slrp_metrics)
+df.head()
+
+#{'Slrp': {'MSE_Raw': 0.14015938871232805, 'MSE_round': 0.16337522441651706, 'RMSE_Raw': 0.3743786702155026, 'RMSE': 0.404197011884696}}
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC ### Six Step Predictions, `n_outputs=6`
+
+# COMMAND ----------
+
+## No features
+date_col = 'datetime'
+actualcol= 'power_W'
+station = 'Slrp'
+n_inputs = 12
+n_outputs = 6
+loc_ = 'Berkeley'
+
+df = slrp_feat[[date_col, actualcol]]
+lstm6_slrp_metrics = dict()
+
+
+# split into array format
+X, y, y_dates = dfSplit_Xy(df, date_col, n_inputs, n_outputs)
+
+# split into train, val, and test
+X_train, y_train, X_val, y_val, X_test, y_test, train_end, y_dates = split_train_test(X, y, y_dates)
+
+print()
+print(station)
+
+lstm6_modelslrp = run_lstm(X_train.shape[1], X_train.shape[2], y_train.shape[1], X_train, y_train, X_val, y_val, n_epochs = 10)
+
+df_out, evals = plot_predictions(lstm6_modelslrp, X_test, y_test, df, station, train_end, date_col, y_dates, 0, y_test.shape[0])
+
+# capture metrics
+lstm6_slrp_metrics.update(evals)
+
+# add additional dataframe columns for visualizations
+# df['Location'] = loc_
+# df['SiteName'] = station
+# df['StepsOut'] = np.tile(np.arange(1, y_test.shape[1]+1, 1),  y_test.shape[0])
+
+print(lstm6_slrp_metrics)
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC ### Six Step Predictions with Features, `n_outputs=6`
+
+# COMMAND ----------
+
+## features
+date_col = 'datetime'
+actualcol= 'power_W'
+station = 'Slrp'
+n_inputs = 12
+n_outputs = 6
+loc_ = 'Berkeley'
+
+df = slrp_feat.drop(columns = ['station'])
+lstm6_slrp_metrics2 = dict()
+
+
+# split into array format
+X, y, y_dates = dfSplit_Xy(df, date_col, n_inputs, n_outputs)
+
+# split into train, val, and test
+X_train, y_train, X_val, y_val, X_test, y_test, train_end, y_dates = split_train_test(X, y, y_dates)
+
+print()
+print(station)
+
+lstm6_modelslrp2 = run_lstm(X_train.shape[1], X_train.shape[2], y_train.shape[1], X_train, y_train, X_val, y_val, n_epochs = 10)
+
+df_out, evals = plot_predictions(lstm6_modelslrp2, X_test, y_test, df, station, train_end, date_col, y_dates, 0, y_test.shape[0])
+
+# capture metrics
+lstm6_slrp_metrics2.update(evals)
+
+# add additional dataframe columns for visualizations
+df_out['Location'] = loc_
+df_out['SiteName'] = station
+df_out['StepsOut'] = np.tile(np.arange(1, y_test.shape[1]+1, 1),  y_test.shape[0])
+
+print(lstm6_slrp_metrics2)
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC ### Read Stations Model Results
+
+# COMMAND ----------
+
+slrp_1StepNoFeatures_ports = spark.read.parquet(f"/mnt/{mount_name}/data/batch/Berkeley_LSTM_1StepNoFeatures")
+slrp_1StepNoFeatures_ports = slrp_1StepNoFeatures_ports.toPandas()
+
+# COMMAND ----------
+
+merged = slrp_1StepNoFeatures_ports.merge(slrp, left_on = 'DateTime', right_on = 'datetime', how = 'left')
+merged['power_pred'] = (8-merged['Predictions']) * 6000
+merged['power_pred_round'] = (8-merged['Predictions_(rounded)']) * 6000
+merged.head()
+
+# COMMAND ----------
+
+print(calc_rmse(merged['power_pred'], merged))
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC ## LSTM -- Streaming
 
 # COMMAND ----------
 
@@ -916,7 +1163,45 @@ plot_predsActuals(prophet_testdf2, 'yhat', 'rounded', 'Actuals', 'DateTime', 'Sl
 
 # COMMAND ----------
 
-seed_model = get_model_from_s3('seed_models/Slrp_model')
+seed_model = train_seed_model(slrp_seed)
+
+# COMMAND ----------
+
+model_to_use = seed_model
+total_data = slrp_seed.copy()
+prediction_results = pd.DataFrame(data = {'datetime': [], 'station': [], 'power_W': [], 'predicted': [],
+                                          'predicted_rounded': [], 'stream_count': [], 'timesteps_out': []})
+predict_flag = 0
+retrain_flag = 0
+
+for row in slrp_test.index:
+    
+    total_data = total_data.append(slrp_test.loc[row,:]).reset_index(drop = True)
+    
+    timestep = slrp_test.loc[row, 'datetime']
+    
+    if timestep.minute == 0:
+        predict_flag = 1
+        print(f'{timestep}\tmake prediction')
+    if (timestep.day == 15) and (timestep.hour == 0) and (timestep.minute == 0):
+        retrain_flag = 1
+        print(f'{timestep}\tretrain')
+        
+    if retrain_flag:
+        retrain_df = total_data[total_data["datetime"] >= total_data["datetime"].max() - dt.timedelta(days=90)]
+        model_to_use = train_model(retrain_df)
+        
+    if predict_flag:
+        prediction_results = prediction_results.append(make_predictions(model_to_use, slrp_seed, slrp_test.head(row+1), slrp))
+        prediction_results = prediction_results.reset_index(drop = True)
+        
+    predict_flag = 0
+    retrain_flag = 0
+    
+
+# COMMAND ----------
+
+save_final_results_to_s3(prediction_results)
 
 # COMMAND ----------
 

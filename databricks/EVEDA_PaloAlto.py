@@ -1539,7 +1539,7 @@ for i in range(rows * cols):
     if i < len(siteName):
         temp_filter = df[df['Station_Location'] == siteName[i]]
         sns.histplot( ax = ax[int(i/cols), i%cols], x = 'Hour', hue='IsWeekend',multiple='stack', discrete=True, data=temp_filter);
-        ax[int(i/cols), i%cols].set_title('Records with a minimum of 1 Port in Use by\n Hour and Part of Week for ' + str(siteName[i]), fontsize = 16);
+        ax[int(i/cols), i%cols].set_title('Fully Occupied Charging Stations by\n Hour and Part of Week for ' + str(siteName[i]), fontsize = 16);
         ax[int(i/cols), i%cols].legend(loc = 'upper right', labels = ['Weekend', 'Weekday'], title = 'Part of Week')
         ax[int(i/cols), i%cols].set( ylabel = 'Count of Records', xlabel = 'Hour')
         ax[int(i/cols), i%cols].xaxis.set_ticks(np.arange(0, 24, 1))

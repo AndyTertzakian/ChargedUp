@@ -62,6 +62,12 @@ print(palo_alto_seed['station'].unique())
 
 # COMMAND ----------
 
+boulder_seed = spark.read.parquet(f"/mnt/{mount_name}/data/boulder_seed")
+boulder_seed = boulder_seed.toPandas()
+print(boulder_seed['station'].unique())
+
+# COMMAND ----------
+
 print(palo_alto_seed['station'].unique()[3:])
 
 # COMMAND ----------
@@ -75,6 +81,17 @@ for station in palo_alto_seed['station'].unique()[3:]:
     print(f"Loaded {station} predictions")
 #     palo_alto_stream_results[station] = palo_alto_stream_station_results
     (palo_alto_stream_station_results.repartition(1)
+    .write
+    .format("csv")
+    .mode("overwrite")
+    .save(f"/mnt/{mount_name}/data/streaming_predictions/" + station.lower() + "_pred_errors_csv"))
+
+# COMMAND ----------
+
+for station in boulder_seed['station'].unique():
+    boulder_stream_station_results = spark.read.parquet(f"/mnt/{mount_name}/data/streaming_predictions/" + station.lower() + "_pred_errors")
+    print(f"Loaded {station} predictions")
+    (boulder_stream_station_results.repartition(1)
     .write
     .format("csv")
     .mode("overwrite")

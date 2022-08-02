@@ -62,7 +62,7 @@ try:
 except Exception as e:
     print("Already mounted :)")
 
-display(dbutils.fs.ls(f"/mnt/{mount_name}/"))
+# display(dbutils.fs.ls(f"/mnt/{mount_name}/"))
 
 # COMMAND ----------
 
@@ -124,7 +124,7 @@ for station in station_df_dict:
         
         ## Retrieve the table from hive and convert it to pandas
         station_df_dict[station]["errs"] = spark.sql(f'select * from {station.replace(" ", "_")}').toPandas()
-        station_df_dict[station]["errs"] = station_df_dict[station]["errs"].sort_values(["datetime", "timesteps_out"])
+        station_df_dict[station]["errs"] = station_df_dict[station]["errs"].sort_values(["stream_count", "datetime"])
         station_df_dict[station]["errs"] = station_df_dict[station]["errs"].reset_index(drop=True)
         
         ## Convert the latitudes and longitudes
@@ -139,11 +139,81 @@ for station in station_df_dict:
 #     palo_alto_preds_df = spark.read.parquet(f"/mnt/{mount_name}/data/streaming_predictions/{station.lower()}_preds")
 #     station_df_dict[station]["preds"] = palo_alto_preds_df
     
-        palo_alto_pred_errors_df = spark.read.parquet(f"/mnt/{mount_name}/data/streaming_predictions/{station.lower()}_pred_errors")
-        station_df_dict[station]["errs"] = palo_alto_pred_errors_df
+        pred_errors_df = spark.read.parquet(f"/mnt/{mount_name}/data/streaming_predictions/{station.lower()}_pred_errors")
+        station_df_dict[station]["errs"] = pred_errors_df
 
         station_df_dict[station]["errs"].write.mode("overwrite").saveAsTable(station.replace(" ", "_"))
         station_df_dict[station]["errs"] = spark.sql(f'select * from {station.replace(" ", "_")}').toPandas()
+        station_df_dict[station]["errs"] = station_df_dict[station]["errs"].sort_values(["stream_count", "datetime"])
+        station_df_dict[station]["errs"] = station_df_dict[station]["errs"].reset_index(drop=True)
+
+# COMMAND ----------
+
+station_df
+
+# COMMAND ----------
+
+for station in station_to_coords:
+    station_df =  station_df_dict[station]["errs"]
+    station_df = station_df[station_df["datetime"] <= station_df["datetime"].min() + dt.timedelta(days=7)]
+
+    frames = []
+    prediction_steps = station_df["stream_count"].unique()
+    for prediction_step in prediction_steps:
+        
+        frame_df = station_df[station_df["stream_count"] == prediction_step]
+        frame_df_2 = station_df[(station_df["stream_count"] <= prediction_step) & (station_df["timesteps_out"] == 0)]
+
+    #     frame_df = frame_df_2.append(frame_df)
+        frame = go.Frame(data=[go.Scatter(x=frame_df["datetime"], y=frame_df["predicted_rounded"]),
+                               go.Scatter(x=frame_df_2["datetime"], y=frame_df_2["ports_available"])])
+        
+        frames.append(frame)
+
+    graph_df = station_df[station_df["stream_count"] == prediction_steps[-2]]
+    graph_df_2 = station_df[(station_df["stream_count"] < prediction_steps[-2]) & (station_df["timesteps_out"] == 0 )]
+
+    fig = go.Figure(
+        data=[
+              go.Scatter(x=graph_df["datetime"], y=graph_df["ports_available"], name = 'Predicted Future Availability'), 
+              go.Scatter(x=graph_df_2["datetime"], y=graph_df_2["predicted_rounded"], name="Past Availability"),
+    #           go.Bar(x=)
+             ],
+        layout=go.Layout(
+
+            width = 850,
+            height = 400,
+            xaxis=dict(range=[station_df["datetime"].min(), station_df["datetime"].min() + dt.timedelta(days=7)], 
+                       autorange=False),
+            yaxis=dict(range=[0, 10], autorange=False),
+            title=station + " - Station Availability Forecast",
+            legend = dict(orientation = 'h', xanchor = "center", x = 0.72, y= 1.15), #Adjust legend position
+                 yaxis_title='Availability',
+            updatemenus=[dict(
+                type="buttons",
+                buttons=[dict(label="Play",
+                              method="animate",
+                              args = [None, {"frame": {"duration": 1000, 
+                                                       "redraw": True},
+                                             "fromcurrent": True, 
+                                             "transition": {"duration": 500}}],
+                             ),
+                          {
+                            "args": [[None], {"frame": {"duration": 0, "redraw": False},
+                                              "mode": "immediate",
+                                              "transition": {"duration": 0}}],
+                            "label": "Pause",
+                            "method": "animate"
+                        }
+                        ]
+            )]
+        ),
+        frames=frames
+    )
+
+    fig.show()
+    filename = station.replace(" ", "_")
+    dbutils.fs.put(f"/FileStore/maps/{filename}.html", fig.to_html(), True)
 
 # COMMAND ----------
 
@@ -152,20 +222,20 @@ for station in station_to_coords:
     print(station)
 
     df_station = station_df_dict[station]["errs"]
-    df_station = df_station.sort_values(["datetime"])
-    df_station = df_station[df_station["timesteps_out"] == 0]
+    df_station = df_station[df_station["stream_count"] == df_station["stream_count"].max()]
 
     fig=make_subplots(specs=[[{"secondary_y":True}]])
-
-    fig.add_trace(                           #Add a bar chart to the figure
-            go.Line(
-            x=df_station['datetime'],
-            y=df_station['ports_available'],
-            line= {"shape": 'hv'},
-            name="Availability",
-            hoverinfo='none'                 #Hide the hoverinfo
-            ),
-            secondary_y=False)               #The bar chart uses the primary y-axis (left)
+    
+    if False:
+        fig.add_trace(                           #Add a bar chart to the figure
+                go.Line(
+                x=df_station['datetime'],
+                y=df_station['ports_available'],
+                line= {"shape": 'hv'},
+                name="Availability",
+                hoverinfo='none'                 #Hide the hoverinfo
+                ),
+                secondary_y=False)               #The bar chart uses the primary y-axis (left)
 
     fig.add_trace(                           #Add a bar chart to the figure
             go.Line(
@@ -177,17 +247,6 @@ for station in station_to_coords:
             ),
             secondary_y=False)               #The bar chart uses the primary y-axis (left)
 
-    # fig.add_trace(                           #Add the second chart (line chart) to the figure
-    #     go.Scatter(
-    #     x=df_station['datetime'],
-    #     y=df_station['predicted_rounded'],
-    #     name="Predicted Availability",
-    #     mode='lines',
-    # #     text=df_city['text'],               
-    # #     hoverinfo='text',                   #Pass the 'text' column to the hoverinfo parameter to customize the tooltip
-    #     line = dict(color='firebrick', width=3)#Specify the color of the line
-    #      ),
-    #     secondary_y=True)                   #The line chart uses the secondary y-axis (right)
 
     fig.update_layout(autosize=False,
                       width = 850,
@@ -198,6 +257,15 @@ for station in station_to_coords:
                  title_font_size = 14,
                  title_font_color="darkblue", #Specify font color of the title
                  title_x=0.5, #Specify the title position
+                 updatemenus=[dict(
+                                type="buttons",
+                                buttons=[
+                                        dict(label="Play",
+                                             method="animate",
+                                             args=[None])
+                                        ]
+                                 )
+                             ],
                  xaxis=dict(
                         tickfont_size=10,
                         tickangle = 270,
@@ -206,14 +274,14 @@ for station in station_to_coords:
                         showline = True,
                         showticklabels = True,
                         dtick="D1", #Change the x-axis ticks to be monthly
-                        tickformat="%d %b\n%Y"
+                        tickformat="%h %d %b\n%Y"
                         ),
                  legend = dict(orientation = 'h', xanchor = "center", x = 0.72, y= 1.15), #Adjust legend position
                  yaxis_title='Availability',
                  yaxis2_title='Predicted Availability')
 
     fig.update_xaxes(
-    range= [df_station["datetime"].max(), df_station["datetime"].max() - dt.timedelta(days=7)],
+    range= [df_station["datetime"].max() - dt.timedelta(hours=6), df_station["datetime"].max()],
     rangeslider_visible=False,
     rangeselector=dict(
         buttons=list([
@@ -224,13 +292,12 @@ for station in station_to_coords:
     #         dict(count=1, label="YTD", step="year", stepmode="todate"),
     #         dict(count=1, label="1y", step="year", stepmode="backward"),
             dict(step="all")
-        ]))
-    )
-
+        ])))
+    
     fig.show()
     filename = station.replace(" ", "_")
     dbutils.fs.put(f"/FileStore/maps/{filename}.html", fig.to_html(), True)
-#     break
+    break
 
 # COMMAND ----------
 
